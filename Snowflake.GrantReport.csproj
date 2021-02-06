@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyName>SnowGrantReport</AssemblyName>
+    <RootNamespace>Snowflake.GrantReport</RootNamespace>
+
+    <Version>2021.2.4.0</Version>
+    <FileVersion>2021.2.4.0</FileVersion>
+    <AssemblyVersion>2021.2.4.0</AssemblyVersion>
+    <Authors>Daniel Odievich (daniel.odievich@snowflake.com)</Authors>
+    <Company>Snowflake Computing</Company>
+    <Product>Snowflake Grant Report</Product>
+    <NeutralLanguage>en</NeutralLanguage>
+    <Description>Snowflake Grant Report provides insights into grants and roles hierarchy in your Snowflake Data Cloud account</Description>
+    <Copyright>Copyright © 2020-2021</Copyright>
+    <PackageLicenseUrl></PackageLicenseUrl>
+    <PackageProjectUrl></PackageProjectUrl>
+    <PackageIconUrl>https://www.snowflake.com/favicon.ico</PackageIconUrl>
+    <RepositoryUrl></RepositoryUrl>
+    <RepositoryType></RepositoryType>
+    <PackageTags></PackageTags>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <ApplicationIcon>Snowflake.ico</ApplicationIcon>  
+    <DebugType>embedded</DebugType>  
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.8.0" />
+    <PackageReference Include="CsvHelper" Version="19.0.0" />
+    <PackageReference Include="EPPlus" Version="4.5.3.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="NLog" Version="4.7.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Readme.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+
+</Project>
