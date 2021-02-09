@@ -11,40 +11,7 @@ namespace Snowflake.GrantReport.ReportObjects
 
         public string GrantedTo { get; set; }
 
-        private string _objectName = String.Empty;
-        public string ObjectName 
-        { 
-            get
-            {
-                return this._objectName;
-            }
-            set
-            {
-                this._objectName = value;
-
-                string[] nameParts = this._objectName.Split('.');
-                if (nameParts.Length == 0)
-                {
-                    this.EntityName = this._objectName.Trim('"');
-                }
-                else if (nameParts.Length == 1)
-                {
-                    this.EntityName = this._objectName.Trim('"');
-                }
-                else if (nameParts.Length == 2)
-                {
-                    this.DBName = nameParts[0].Trim('"');
-                    this.SchemaName = nameParts[1].Trim('"');
-                    this.EntityName = nameParts[1].Trim('"');
-                }
-                else if (nameParts.Length == 3)
-                {
-                    this.DBName = nameParts[0].Trim('"');
-                    this.SchemaName = nameParts[1].Trim('"');
-                    this.EntityName = nameParts[2].Trim('"');
-                }
-            }
-        }
+        public string ObjectName { get; set; }
 
         public string ObjectType { get; set; }
 

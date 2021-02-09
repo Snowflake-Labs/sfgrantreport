@@ -126,13 +126,24 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
         public Account buildObjectHierarchyWithGrants()
         {
+            loggerConsole.Info("Loading grants");
+
             // Load selected types of grants to visualize
             List<Grant> grantsToAccountList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("ACCOUNT"), new GrantMap());
+            loggerConsole.Trace("Grants in Accounts {0}", grantsToAccountList.Count);
+
             List<Grant> grantsToDatabaseList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("DATABASE"), new GrantMap());
+            loggerConsole.Trace("Grants in Databases {0}", grantsToDatabaseList.Count);
+
             List<Grant> grantsToSchemaList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("SCHEMA"), new GrantMap());
+            loggerConsole.Trace("Grants in Schemas {0}", grantsToSchemaList.Count);
+
             List<Grant> grantsToTableList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("TABLE"), new GrantMap());
+            loggerConsole.Trace("Grants in Tables {0}", grantsToTableList.Count);
+
             List<Grant> grantsToViewList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("VIEW"), new GrantMap());
-            
+            loggerConsole.Trace("Grants in Views {0}", grantsToViewList.Count);
+
             Account account = new Account();
             account.FullName = "TODO";
             account.ShortName = account.FullName;
@@ -154,6 +165,10 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
             if (grantsToDatabaseList != null)
             {
+                int j = 0;
+
+                loggerConsole.Info("Loading databases from {0} grants", grantsToDatabaseList.Count);
+
                 var grantsToDatabaseGroups = grantsToDatabaseList.GroupBy(g => g.ObjectName);
                 foreach (var grantsToDatabaseGroup in grantsToDatabaseGroups)
                 {
@@ -166,11 +181,25 @@ namespace Snowflake.GrantReport.ProcessingSteps
                     database.Grants = grantsToDatabaseGroup.ToList();
 
                     account.Databases.Add(database);
+
+                    j++;
+                    if (j % 100 == 0)
+                    {
+                        Console.Write("{0}.", j);
+                    }                   
                 }
+                Console.WriteLine();
+                loggerConsole.Info("Done {0} Databases", j);
             }
+
+            account.DatabasesDict = account.Databases.ToDictionary(k => k.ShortName, d => d, StringComparer.InvariantCulture);
 
             if (grantsToSchemaList != null)
             {
+                int j = 0;
+
+                loggerConsole.Info("Loading schemas from {0} grants", grantsToSchemaList.Count);
+
                 var grantsToSchemaGroups = grantsToSchemaList.GroupBy(g => g.ObjectName);
                 foreach (var grantsToSchemaGroup in grantsToSchemaGroups)
                 {   
@@ -179,8 +208,11 @@ namespace Snowflake.GrantReport.ProcessingSteps
                     Schema schema = new Schema();
                     schema.FullName = firstGrantInGroup.ObjectNameUnquoted;
                     schema.ShortName = firstGrantInGroup.EntityName;
-                    schema.Database = account.Databases.Where(d => d.ShortName == firstGrantInGroup.DBName).FirstOrDefault();
-                    if (schema.Database == null)
+                    if (account.DatabasesDict.ContainsKey(firstGrantInGroup.DBName) == true)
+                    {
+                        schema.Database = account.DatabasesDict[firstGrantInGroup.DBName];
+                    }
+                    else
                     {
                         Database database = new Database();
                         database.Account = account;
@@ -189,15 +221,34 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
                         account.Databases.Add(database);
                         schema.Database = database;
+
+                        account.DatabasesDict.Add(database.ShortName, database);
                     }
                     schema.Grants = grantsToSchemaGroup.ToList();
 
                     schema.Database.Schemas.Add(schema);
+
+                    j++;
+                    if (j % 250 == 0)
+                    {
+                        Console.Write("{0}.", j);
+                    }
                 }
+                Console.WriteLine();
+                loggerConsole.Info("Done {0} Schemas", j);
+            }
+
+            foreach (Database database in account.Databases)
+            {
+                database.SchemasDict = database.Schemas.ToDictionary(k => k.ShortName, s => s, StringComparer.InvariantCulture);
             }
 
             if (grantsToTableList != null)
             {
+                int j = 0;
+
+                loggerConsole.Info("Loading tables from {0} grants", grantsToTableList.Count);
+
                 var grantsToTableGroups = grantsToTableList.GroupBy(g => g.ObjectName);
                 foreach (var grantsToTableGroup in grantsToTableGroups)
                 {
@@ -206,15 +257,38 @@ namespace Snowflake.GrantReport.ProcessingSteps
                     Table table = new Table();
                     table.FullName = firstGrantInGroup.ObjectNameUnquoted;
                     table.ShortName = firstGrantInGroup.EntityName;
-                    table.Schema = account.Databases.Where(d => d.ShortName == firstGrantInGroup.DBName).FirstOrDefault().Schemas.Where(s => s.ShortName == firstGrantInGroup.SchemaName).FirstOrDefault();
+                    if (account.DatabasesDict.ContainsKey(firstGrantInGroup.DBName) == true)
+                    {
+                        Database thisDatabase = account.DatabasesDict[firstGrantInGroup.DBName];
+                        if (thisDatabase.SchemasDict.ContainsKey(firstGrantInGroup.SchemaName) == true)
+                        {
+                            table.Schema = thisDatabase.SchemasDict[firstGrantInGroup.SchemaName];
+                        }
+                    }
+                    //table.Schema = account.Databases.Where(d => d.ShortName == firstGrantInGroup.DBName).FirstOrDefault().Schemas.Where(s => s.ShortName == firstGrantInGroup.SchemaName).FirstOrDefault();
                     table.Grants = grantsToTableGroup.ToList();
 
-                    table.Schema.Tables.Add(table);
+                    if (table.Schema != null)
+                    {
+                        table.Schema.Tables.Add(table);
+                    }
+
+                    j++;
+                    if (j % 5000 == 0)
+                    {
+                        Console.Write("{0}.", j);
+                    }
                 }
+                Console.WriteLine();
+                loggerConsole.Info("Done {0} Tables", j);
             }
 
             if (grantsToViewList != null)
             {
+                int j = 0;
+
+                loggerConsole.Info("Loading views from {0} grants", grantsToViewList.Count);
+
                 var grantsToViewGroups = grantsToViewList.GroupBy(g => g.ObjectName);
                 foreach (var grantsToViewGroup in grantsToViewGroups)
                 {
@@ -223,11 +297,31 @@ namespace Snowflake.GrantReport.ProcessingSteps
                     View view = new View();
                     view.FullName = firstGrantInGroup.ObjectNameUnquoted;
                     view.ShortName = firstGrantInGroup.EntityName;
-                    view.Schema = account.Databases.Where(d => d.ShortName == firstGrantInGroup.DBName).FirstOrDefault().Schemas.Where(s => s.ShortName == firstGrantInGroup.SchemaName).FirstOrDefault();
+                    if (account.DatabasesDict.ContainsKey(firstGrantInGroup.DBName) == true)
+                    {
+                        Database thisDatabase = account.DatabasesDict[firstGrantInGroup.DBName];
+                        if (thisDatabase.SchemasDict.ContainsKey(firstGrantInGroup.SchemaName) == true)
+                        {
+                            view.Schema = thisDatabase.SchemasDict[firstGrantInGroup.SchemaName];
+                        }
+                    }
+                    //view.Schema = account.Databases.Where(d => d.ShortName == firstGrantInGroup.DBName).FirstOrDefault().Schemas.Where(s => s.ShortName == firstGrantInGroup.SchemaName).FirstOrDefault();
                     view.Grants = grantsToViewGroup.ToList();
 
-                    view.Schema.Views.Add(view);
+                    if (view.Schema != null)
+                    {
+                        view.Schema.Views.Add(view);
+                    }
+                    
+
+                    j++;
+                    if (j % 5000 == 0)
+                    {
+                        Console.Write("{0}.", j);
+                    }
                 }
+                Console.WriteLine();
+                loggerConsole.Info("Done {0} Views", j);
             }
 
             return account;

@@ -12,6 +12,8 @@ namespace Snowflake.GrantReport.ReportObjects
 
         public List<Schema> Schemas { get; set; } = new List<Schema>();
 
+        public Dictionary<string, Schema> SchemasDict { get; set; } = new Dictionary<string, Schema>(StringComparer.InvariantCulture);
+
         public override string EntityType
         {
             get

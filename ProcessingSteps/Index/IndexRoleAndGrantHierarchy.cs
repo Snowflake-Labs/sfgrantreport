@@ -35,7 +35,7 @@ namespace Snowflake.GrantReport.ProcessingSteps
                 List<RoleMember> grantsOfRolesList = FileIOHelper.ReadListFromCSVFile<RoleMember>(FilePathMap.Report_RoleMember_FilePath(), new RoleMemberMap());
                 if (rolesList != null)
                 {
-                    Dictionary<string, Role> rolesDict = rolesList.ToDictionary(r => r.Name, k => k);
+                    Dictionary<string, Role> rolesDict = rolesList.ToDictionary(k => k.Name, r => r);
 
                     loggerConsole.Info("Parsing role details for {0} roles", rolesList.Count);
 

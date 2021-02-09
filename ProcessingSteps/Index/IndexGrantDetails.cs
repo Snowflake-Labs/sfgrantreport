@@ -195,6 +195,9 @@ namespace Snowflake.GrantReport.ProcessingSteps
                                 latestGrantRow = new ObjectTypeGrant();
                                 latestGrantRow.ObjectType = grant.ObjectType;
                                 latestGrantRow.ObjectName = grant.ObjectName;
+                                latestGrantRow.DBName = grant.DBName;
+                                latestGrantRow.SchemaName = grant.SchemaName;
+                                latestGrantRow.EntityName = grant.EntityName;
                                 latestGrantRow.GrantedTo = grant.GrantedTo;
 
                                 objectGrantsList.Add(latestGrantRow);

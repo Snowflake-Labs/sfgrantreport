@@ -10,6 +10,8 @@ namespace Snowflake.GrantReport.ReportObjects
     {        
         public List<Database> Databases { get; set; } = new List<Database>();
 
+        public Dictionary<string, Database> DatabasesDict { get; set; } = new Dictionary<string, Database>();
+
         public override string EntityType
         {
             get

@@ -159,7 +159,7 @@ namespace Snowflake.GrantReport.ProcessingSteps
                             Console.Write("{0}.", j);
                         }
                     }
-                    Console.WriteLine("Done {0} items", usersList.Count);
+                    loggerConsole.Info("Done {0} items", usersList.Count);
 
                     FileIOHelper.WriteListToCSVFile<User>(usersList, new UserDetailsMap(), FilePathMap.Report_UserDetail_FilePath());                    
                 }

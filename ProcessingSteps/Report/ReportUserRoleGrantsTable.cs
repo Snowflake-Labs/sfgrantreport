@@ -69,6 +69,95 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
         #endregion        
 
+        Dictionary<string, string> privilegeNamesShortDict = new Dictionary<string, string>
+        {
+            // Common
+            {"USAGE", "U"},
+            {"OWNERSHIP", "O"},
+
+            {"MODIFY", "M"},
+            {"MONITOR", "MON"},
+
+            // Database
+            {"CREATE SCHEMA", "SCHM"},
+            {"IMPORTED PRIVILEGES", "IMP_PRV"},
+            {"REFERENCE_USAGE", "REF_USG"},
+
+            // Schema
+            {"ADD SEARCH OPTIMIZATION", "SEO"},
+            {"CREATE EXTERNAL TABLE", "TBL_EXT"},
+            {"CREATE FILE FORMAT", "FF"},
+            {"CREATE FUNCTION", "FUNC"},
+            {"CREATE MASKING POLICY", "MSKPOL"},
+            {"CREATE MATERIALIZED VIEW", "MV"},
+            {"CREATE PIPE", "PIPE"},
+            {"CREATE PROCEDURE", "PROC"},
+            {"CREATE SEQUENCE", "SEQ"},
+            {"CREATE STAGE", "STG"},
+            {"CREATE STREAM", "STRM"},
+            {"CREATE TABLE", "TBL"},
+            {"CREATE TASK", "TASK"},
+            {"CREATE TEMPORARY TABLE", "TBL_TMP"},
+            {"CREATE VIEW", "VIEW"},
+
+            // Table
+            {"INSERT", "C"},
+            {"SELECT", "R"},
+            {"UPDATE", "U"},
+            {"DELETE", "D"},
+            {"TRUNCATE", "T"},
+
+            // View
+            {"REBUILD", "RBLD"},
+            {"REFERENCES", "REF"}
+        };
+
+        Dictionary<string, int> privilegeOrderDict = new Dictionary<string, int>
+        {
+            // Common
+            {"USAGE",       1},
+            {"OWNERSHIP",   2},
+
+            // Database
+            {"CREATE SCHEMA",       120},
+            {"IMPORTED PRIVILEGES", 121},
+            {"REFERENCE_USAGE",     122},
+
+            // Schema
+            {"CREATE TABLE",                200},
+            {"CREATE TEMPORARY TABLE",      201},
+            {"CREATE EXTERNAL TABLE",       202},
+            {"CREATE VIEW",                 203},
+            {"CREATE MATERIALIZED VIEW",    204},
+            {"CREATE PROCEDURE",            205},
+            {"CREATE FUNCTION",             206},
+            {"CREATE STAGE",                207},
+            {"CREATE FILE FORMAT",          208},
+            {"CREATE TASK",                 209},
+            {"CREATE PIPE",                 210},
+            {"CREATE SEQUENCE",             211},
+            {"CREATE STREAM",               212},
+            {"CREATE MASKING POLICY",       213},
+
+            {"ADD SEARCH OPTIMIZATION",     200},
+
+            // Table
+            {"INSERT",      10},
+            {"SELECT",      11},
+            {"UPDATE",      12},
+            {"DELETE",      13},
+            {"TRUNCATE",    14},
+
+            // View
+            {"REBUILD",     15},
+            {"REFERENCES",  16},
+
+            // Common
+            {"MODIFY",      50},
+            {"MONITOR",     51}
+        };
+
+
         public override bool Execute(ProgramOptions programOptions)
         {
             Stopwatch stopWatch = new Stopwatch();
@@ -379,7 +468,7 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
             }
 
             Account account = null;
-            Dictionary<string, string> databaseVsRolesGrantsSheetsDict = new Dictionary<string, string>();
+            Dictionary<string, string> databaseVsRolesGrantsSheetsDict = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
             if (sheetsToIncludeList.Contains("DatabaseVsRoleVsPermissions") == true) 
             {
                 account = buildObjectHierarchyWithGrants();
@@ -391,9 +480,9 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
                     {
                         haveUniqueSheetName = false;
                         // Duplicate name, it is when you have several long-named databases with similar names in first 30 characters
-                        for (int i = 0; i < 10; i++)
+                        for (int i = 0; i < 09; i++)
                         {
-                            sheetName = String.Format("{0}{1}", sheetName.Substring(0, 30), i);
+                            sheetName = String.Format("{0}{1}", sheetName.Substring(0, sheetName.Length - 1), i);
                             if (databaseVsRolesGrantsSheetsDict.ContainsKey(sheetName) == false) 
                             {
                                 databaseVsRolesGrantsSheetsDict.Add(sheetName, database.ShortName);
@@ -994,7 +1083,17 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
                     }
                 
                     range = sheet.Cells[headerRowIndex, 1, sheet.Dimension.Rows, sheet.Dimension.Columns];
-                    table = sheet.Tables.Add(range, getExcelTableOrSheetSafeString(String.Format(SHEET_GRANTS_IN_DATABASE_FOR_ALL_ROLES, database.ShortName)));
+                    try
+                    {
+                        table = sheet.Tables.Add(range, getExcelTableOrSheetSafeString(String.Format(SHEET_GRANTS_IN_DATABASE_FOR_ALL_ROLES, database.ShortName)));
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        if (ex.Message == "Tablename is not unique")
+                        {
+                            table = sheet.Tables.Add(range, String.Format("{0}_1", getExcelTableOrSheetSafeString(String.Format(SHEET_GRANTS_IN_DATABASE_FOR_ALL_ROLES, database.ShortName))));
+                        }
+                    }
                     table.ShowHeader = true;
                     table.TableStyle = TableStyles.Light18;
                     table.ShowFilter = true;
@@ -1075,13 +1174,14 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
         {
             if (listOfGrants.Count == 0) return;
             
-            string cellValue = String.Join(',', listOfGrants.OrderBy(g => g.PrivilegeOrder).ToList().Select(g => g.PrivilegeDisplayShort).ToArray());
+            string cellValue = String.Join(',', listOfGrants.OrderBy(g => g.PrivilegeOrder(privilegeOrderDict)).ToList().Select(g => g.PrivilegeDisplayShort(privilegeNamesShortDict)).ToArray());
             cell.Value = cellValue;
             if (cellValue.ToString().Length > 17)
             {
-                cell.AddComment(String.Join('\n', listOfGrants.OrderBy(g => g.PrivilegeOrder).ToList().Select(g => g.PrivilegeDisplayLong).ToArray()), "Snowflake");
+                cell.AddComment(String.Join('\n', listOfGrants.OrderBy(g => g.PrivilegeOrder(privilegeOrderDict)).ToList().Select(g => g.PrivilegeDisplayLong).ToArray()), "Snowflake");
                 cell.Comment.AutoFit = true;
             }
         }
+        
     }
 }

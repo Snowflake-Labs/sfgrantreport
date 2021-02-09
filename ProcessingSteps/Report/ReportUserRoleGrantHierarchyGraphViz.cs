@@ -58,7 +58,7 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
                         if (thisRoleAndItsRelationsList != null && thisRoleAndItsRelationsHierarchiesList != null)
                         {
-                            Dictionary<string, Role> rolesDict = thisRoleAndItsRelationsList.ToDictionary(r => r.Name, k => k);
+                            Dictionary<string, Role> rolesDict = thisRoleAndItsRelationsList.ToDictionary(k => k.Name, r => r);
                             Dictionary<string, Role> roleNamesOutput = new Dictionary<string, Role>(thisRoleAndItsRelationsList.Count);
                             Role roleBeingOutput = null;
 
@@ -162,9 +162,21 @@ namespace Snowflake.GrantReport.ProcessingSteps
                                 sbGraphViz.AppendFormat("   \"{0}.schema\"  [shape=\"folder\" label=<", database.FullName);  sbGraphViz.AppendLine();
                                 sbGraphViz.AppendLine  ("    <table border=\"0\" cellborder=\"1\" bgcolor=\"white\">");
                                 sbGraphViz.AppendLine  ("     <tr><td>S</td><td>T</td><td>V</td></tr>");
+                                
+                                int schemaLimit = 0;
                                 foreach (Schema schema in database.Schemas)
                                 {
+                                    // Only output 
+                                    if (schemaLimit >= 10) 
+                                    {
+                                        sbGraphViz.AppendFormat("     <tr><td align=\"left\">Up to {0}</td><td align=\"right\">...</td><td align=\"right\">...</td></tr>", database.Schemas.Count); sbGraphViz.AppendLine();
+
+                                        break;
+                                    }
+
                                     sbGraphViz.AppendFormat("     <tr><td align=\"left\">{0}</td><td align=\"right\">{1}</td><td align=\"right\">{2}</td></tr>", schema.ShortName, schema.Tables.Count, schema.Views.Count); sbGraphViz.AppendLine();
+
+                                    schemaLimit++;
                                 }
                                 sbGraphViz.AppendLine  ("    </table>>];");
 
@@ -174,108 +186,6 @@ namespace Snowflake.GrantReport.ProcessingSteps
                                 sbGraphViz.AppendFormat("  }} // /Database {0}", database.FullName); sbGraphViz.AppendLine();
 
                                 databaseIndex++;
-
-                                #region Ouput of individual schema and table details
-                                // Commented out
-                                // Output schemas
-                                // int schemaIndex = 0;
-                                // foreach (Schema schema in database.Schemas)
-                                // {
-                                //     sbGraphViz.AppendFormat("   // Schema {0}", schema.FullName); sbGraphViz.AppendLine();
-                                //     sbGraphViz.AppendFormat("   subgraph cluster_db_{0}_schema_{1} {{", databaseIndex, schemaIndex); sbGraphViz.AppendLine();
-                                //     sbGraphViz.AppendLine  ("    style=\"filled\";");
-                                //     sbGraphViz.AppendLine  ("    fillcolor=\"cornsilk\";");
-                                //     sbGraphViz.AppendFormat("    label = \"schema: {0}\";", schema.ShortName); sbGraphViz.AppendLine();
-                                //     sbGraphViz.AppendLine  ("    node [shape=\"folder\" fillcolor=\"moccasin\"];");
-                                //     sbGraphViz.AppendLine();
-
-                                //     sbGraphViz.AppendFormat("    \"{0}\" [label=\"{1}\nTables: {2}\nViews: {3}\"];", schema.FullName, schema.ShortName, schema.Tables.Count, schema.Views.Count); sbGraphViz.AppendLine();
-                                //     sbGraphViz.AppendLine();
-
-                                    // Output Tables
-                                    // if (schema.Tables.Count > 0)
-                                    // {
-                                    //     sbGraphViz.AppendLine  ("    // Tables ");
-                                    //     sbGraphViz.AppendFormat("    subgraph cluster_db_{0}_schema_{1}_tables {{", databaseIndex, schemaIndex); sbGraphViz.AppendLine();
-                                    //     sbGraphViz.AppendLine  ("     style=\"filled\";");
-                                    //     sbGraphViz.AppendLine  ("     fillcolor=\"gold\";");
-                                    //     sbGraphViz.AppendLine  ("     label = \"tables\";");
-                                    //     sbGraphViz.AppendLine  ("     node [shape=\"rectangle\" fillcolor=\"darkseagreen\"];");
-                                    //     sbGraphViz.AppendLine();
-
-                                    //     sbGraphViz.AppendFormat("     \"{0}_tables\" [label=\"{1}\"];", schema.FullName, String.Join("\\n", schema.Tables.Select(t => t.ShortName))); sbGraphViz.AppendLine();
-
-                                    //     // int tableIndex = 0;
-                                    //     // foreach (Table table in schema.Tables)
-                                    //     // {
-                                    //     //     sbGraphViz.AppendFormat("     \"{0}\" [label=\"{1}\"];", table.FullName, table.ShortName); sbGraphViz.AppendLine();
-                                            
-                                    //     //     tableIndex++;
-                                    //     // }
-
-                                    //     // // Connect tables
-                                    //     // if (schema.Tables.Count > 1)
-                                    //     // {
-                                    //     //     sbGraphViz.AppendLine  ("     // Connect Tables");
-                                    //     //     sbGraphViz.AppendFormat("     {0} [style=\"invis\"];", String.Join("->", schema.Tables.Select(s => String.Format("\"{0}\"", s.FullName)))); sbGraphViz.AppendLine();
-                                    //     // }
-
-                                    //     sbGraphViz.AppendLine  ("    }// /Tables ");
-                                    //     sbGraphViz.AppendLine();
-
-                                    // }
-                                    
-                                    // if (schema.Views.Count > 0)
-                                    // {
-                                    //     // Output Views
-                                    //     sbGraphViz.AppendLine  ("    // Views ");
-                                    //     sbGraphViz.AppendFormat("    subgraph cluster_db_{0}_schema_{1}_Views {{", databaseIndex, schemaIndex); sbGraphViz.AppendLine();
-                                    //     sbGraphViz.AppendLine  ("     style=\"filled\";");
-                                    //     sbGraphViz.AppendLine  ("     fillcolor=\"bisque\";");
-                                    //     sbGraphViz.AppendLine  ("     label = \"views\";");
-                                    //     sbGraphViz.AppendLine  ("     node [shape=\"rectangle\" fillcolor=\"darkseagreen\"];");
-                                    //     sbGraphViz.AppendLine();
-
-                                    //     sbGraphViz.AppendFormat("     \"{0}_views\" [label=\"{1}\"];", schema.FullName, String.Join("\\n", schema.Views.Select(v => v.ShortName))); sbGraphViz.AppendLine();
-
-                                    //     // int viewIndex = 0;
-                                    //     // foreach (View view in schema.Views)
-                                    //     // {
-                                    //     //     sbGraphViz.AppendFormat("     \"{0}\" [label=\"{1}\"];", view.FullName, view.ShortName); sbGraphViz.AppendLine();
-                                            
-                                    //     //     viewIndex++;
-                                    //     // }
-
-                                    //     // // Connect views
-                                    //     // if (schema.Views.Count > 1)
-                                    //     // {
-                                    //     //     sbGraphViz.AppendLine  ("     // Connect Views");
-                                    //     //     sbGraphViz.AppendFormat("     {0} [style=\"invis\"];", String.Join("->", schema.Views.Select(s => String.Format("\"{0}\"", s.FullName)))); sbGraphViz.AppendLine();
-                                    //     // }
-
-                                    //     sbGraphViz.AppendLine  ("    }// /Views ");
-                                    //     sbGraphViz.AppendLine();
-
-                                    // }
-
-                                //     sbGraphViz.AppendFormat("   }}// /Schema {0}", schema.FullName); sbGraphViz.AppendLine();
-                                //     sbGraphViz.AppendLine();
-                                    
-                                //     schemaIndex++;
-                                // }
-
-                                // Connect schemas
-                                // sbGraphViz.AppendLine("  // Connect Schemas");
-                                // foreach (Schema schema in database.Schemas)
-                                // {
-                                //     sbGraphViz.AppendFormat("  \"{0}\"->\"{1}\" [style=\"invis\"];", database.FullName, schema.FullName); sbGraphViz.AppendLine();
-                                // }
-                                // if (database.Schemas.Count > 0)
-                                // {
-                                //     sbGraphViz.AppendLine("  // Connect Schemas");
-                                //     sbGraphViz.AppendFormat("   \"{0}\"->{1} [style=\"invis\"];", database.FullName, String.Join("->", database.Schemas.Select(s => String.Format("\"{0}\"", s.FullName)))); sbGraphViz.AppendLine();
-                                // }
-                                #endregion
                             }
 
                             sbGraphViz.AppendLine(" } // /Databases");
@@ -296,7 +206,7 @@ namespace Snowflake.GrantReport.ProcessingSteps
                                     {
                                         if (roleNamesOutput.ContainsKey(grant.GrantedTo) == true)
                                         {
-                                            sbGraphViz.AppendFormat(" \"{0}\"->\"{1}\" [color=\"darkkhaki\"];", grant.GrantedTo, grant.ObjectName); sbGraphViz.AppendLine();
+                                            sbGraphViz.AppendFormat(" \"{0}\"->\"{1}\" [color=\"darkkhaki\"];", grant.GrantedTo, grant.ObjectNameUnquoted); sbGraphViz.AppendLine();
                                         }
                                     }
                                 }
@@ -325,36 +235,6 @@ namespace Snowflake.GrantReport.ProcessingSteps
   </table>>];";
                             sbGraphViz.AppendLine(legend);
                             
-                            // sbGraphViz.AppendLine();
-                            // sbGraphViz.AppendLine(" // Legend");
-                            // sbGraphViz.AppendLine(" subgraph cluster_legend {");
-                            // sbGraphViz.AppendLine("  style=\"filled\";");
-                            // sbGraphViz.AppendLine("  fillcolor=\"lightgrey\";");
-                            // sbGraphViz.AppendLine("  label = \"Legend\";");
-                            // sbGraphViz.AppendLine("  edge [style=\"invis\"];");
-
-                            // roleBeingOutput = new Role {Name = "BUILT IN", Type = RoleType.BuiltIn};
-                            // sbGraphViz.AppendFormat("  \"{0}\"{1};", roleBeingOutput.Name, getRoleStyleAttribute(roleBeingOutput)); sbGraphViz.AppendLine();
-                            // roleBeingOutput = new Role {Name = "SCIM", Type = RoleType.SCIM};
-                            // sbGraphViz.AppendFormat("  \"{0}\"{1};", roleBeingOutput.Name, getRoleStyleAttribute(roleBeingOutput)); sbGraphViz.AppendLine();
-                            // roleBeingOutput = new Role {Name = "ROLE MANAGEMENT", Type = RoleType.RoleManagement};
-                            // sbGraphViz.AppendFormat("  \"{0}\"{1};", roleBeingOutput.Name, getRoleStyleAttribute(roleBeingOutput)); sbGraphViz.AppendLine();
-                            // roleBeingOutput = new Role {Name = "FUNCTIONAL", Type = RoleType.Functional};
-                            // sbGraphViz.AppendFormat("  \"{0}\"{1};", roleBeingOutput.Name, getRoleStyleAttribute(roleBeingOutput)); sbGraphViz.AppendLine();
-                            // roleBeingOutput = new Role {Name = "FUNCTIONAL NOT UNDER SYSADMIN", Type = RoleType.FunctionalNotUnderSysadmin};
-                            // sbGraphViz.AppendFormat("  \"{0}\"{1};", roleBeingOutput.Name, getRoleStyleAttribute(roleBeingOutput)); sbGraphViz.AppendLine();
-                            // roleBeingOutput = new Role {Name = "ACCESS", Type = RoleType.Access};
-                            // sbGraphViz.AppendFormat("  \"{0}\"{1};", roleBeingOutput.Name, getRoleStyleAttribute(roleBeingOutput)); sbGraphViz.AppendLine();
-                            // roleBeingOutput = new Role {Name = "ACCESS NOT UNDER SYSADMIN", Type = RoleType.AccessNotUnderSysadmin};
-                            // sbGraphViz.AppendFormat("  \"{0}\"{1};", roleBeingOutput.Name, getRoleStyleAttribute(roleBeingOutput)); sbGraphViz.AppendLine();
-                            // roleBeingOutput = new Role {Name = "NOT UNDER ACCOUNTADMIN", Type = RoleType.NotUnderAccountAdmin};
-                            // sbGraphViz.AppendFormat("  \"{0}\"{1};", roleBeingOutput.Name, getRoleStyleAttribute(roleBeingOutput)); sbGraphViz.AppendLine();
-                            // roleBeingOutput = new Role {Name = "UNKNOWN", Type = RoleType.Unknown};
-                            // sbGraphViz.AppendFormat("  \"{0}\"{1};", roleBeingOutput.Name, getRoleStyleAttribute(roleBeingOutput)); sbGraphViz.AppendLine();
-                            // sbGraphViz.AppendLine("  \"BUILT IN\"->\"SCIM\"-> \"ROLE MANAGEMENT\" -> \"FUNCTIONAL\" -> \"FUNCTIONAL NOT UNDER SYSADMIN\" -> \"ACCESS\" -> \"ACCESS NOT UNDER SYSADMIN\" ->\"NOT UNDER ACCOUNTADMIN\"->\"UNKNOWN\"");
-                            // sbGraphViz.AppendLine(" }");
-                            // sbGraphViz.AppendLine(" // /Legend");
-
                             #endregion
 
                             // Close the graph
@@ -421,26 +301,26 @@ namespace Snowflake.GrantReport.ProcessingSteps
                             // https://edotor.net
                             xmlWriter.WriteStartElement("a"); 
                             xmlWriter.WriteAttributeString("href", String.Format("https://edotor.net/?#{0}", Uri.EscapeDataString(graphText)));
-                            xmlWriter.WriteString("Opt1");
+                            xmlWriter.WriteString("Online");
                             xmlWriter.WriteEndElement(); // </a>
 
-                            // http://magjac.com/graphviz-visual-editor
-                            xmlWriter.WriteStartElement("a"); 
-                            xmlWriter.WriteAttributeString("href", String.Format("http://magjac.com/graphviz-visual-editor/?dot={0}", Uri.EscapeDataString(graphText)));
-                            xmlWriter.WriteString("Opt2");
-                            xmlWriter.WriteEndElement(); // </a>
+                            // // http://magjac.com/graphviz-visual-editor
+                            // xmlWriter.WriteStartElement("a"); 
+                            // xmlWriter.WriteAttributeString("href", String.Format("http://magjac.com/graphviz-visual-editor/?dot={0}", Uri.EscapeDataString(graphText)));
+                            // xmlWriter.WriteString("Opt2");
+                            // xmlWriter.WriteEndElement(); // </a>
 
-                            // https://stamm-wilbrandt.de/GraphvizFiddle/2.1.2/index.html
-                            xmlWriter.WriteStartElement("a"); 
-                            xmlWriter.WriteAttributeString("href", String.Format("https://stamm-wilbrandt.de/GraphvizFiddle/2.1.2/index.html?#{0}", Uri.EscapeDataString(graphText)));
-                            xmlWriter.WriteString("Opt3");
-                            xmlWriter.WriteEndElement(); // </a>
+                            // // https://stamm-wilbrandt.de/GraphvizFiddle/2.1.2/index.html
+                            // xmlWriter.WriteStartElement("a"); 
+                            // xmlWriter.WriteAttributeString("href", String.Format("https://stamm-wilbrandt.de/GraphvizFiddle/2.1.2/index.html?#{0}", Uri.EscapeDataString(graphText)));
+                            // xmlWriter.WriteString("Opt3");
+                            // xmlWriter.WriteEndElement(); // </a>
 
-                            // https://dreampuf.github.io/GraphvizOnline
-                            xmlWriter.WriteStartElement("a"); 
-                            xmlWriter.WriteAttributeString("href", String.Format("https://dreampuf.github.io/GraphvizOnline/#{0}", Uri.EscapeDataString(graphText)));
-                            xmlWriter.WriteString("Opt4");
-                            xmlWriter.WriteEndElement(); // </a>
+                            // // https://dreampuf.github.io/GraphvizOnline
+                            // xmlWriter.WriteStartElement("a"); 
+                            // xmlWriter.WriteAttributeString("href", String.Format("https://dreampuf.github.io/GraphvizOnline/#{0}", Uri.EscapeDataString(graphText)));
+                            // xmlWriter.WriteString("Opt4");
+                            // xmlWriter.WriteEndElement(); // </a>
 
                             xmlWriter.WriteEndElement(); // </td>
 
@@ -448,11 +328,6 @@ namespace Snowflake.GrantReport.ProcessingSteps
                             xmlWriter.WriteStartElement("a"); 
                             xmlWriter.WriteAttributeString("href", FilePathMap.Report_Diagram_SVG_RoleAndItsRelationsGrants_FilePath(role.Name, false));
                             xmlWriter.WriteString("SVG");
-                            // xmlWriter.WriteStartElement("img");
-                            // xmlWriter.WriteAttributeString("src", "https://upload.wikimedia.org/wikipedia/commons/4/4f/SVG_Logo.svg"); 
-                            // xmlWriter.WriteAttributeString("width", "24");
-                            // xmlWriter.WriteAttributeString("height", "24");
-                            // xmlWriter.WriteEndElement(); // </img>
                             xmlWriter.WriteEndElement(); // </a>
                             xmlWriter.WriteEndElement(); // </td>
 
@@ -460,11 +335,6 @@ namespace Snowflake.GrantReport.ProcessingSteps
                             xmlWriter.WriteStartElement("a"); 
                             xmlWriter.WriteAttributeString("href", FilePathMap.Report_Diagram_PNG_RoleAndItsRelationsGrants_FilePath(role.Name, false));
                             xmlWriter.WriteString("PNG");
-                            // xmlWriter.WriteStartElement("img");
-                            // xmlWriter.WriteAttributeString("src", "https://icons.iconarchive.com/icons/untergunter/leaf-mimes/24/png-icon.png"); 
-                            // xmlWriter.WriteAttributeString("width", "24");
-                            // xmlWriter.WriteAttributeString("height", "24");
-                            // xmlWriter.WriteEndElement(); // </img>
                             xmlWriter.WriteEndElement(); // </a>
                             xmlWriter.WriteEndElement(); // </td>
 
@@ -472,11 +342,6 @@ namespace Snowflake.GrantReport.ProcessingSteps
                             xmlWriter.WriteStartElement("a"); 
                             xmlWriter.WriteAttributeString("href", FilePathMap.Report_Diagram_PDF_RoleAndItsRelationsGrants_FilePath(role.Name, false));
                             xmlWriter.WriteString("PDF");
-                            // xmlWriter.WriteStartElement("img");
-                            // xmlWriter.WriteAttributeString("src", "https://www.adobe.com/content/dam/cc/en/legal/images/badges/PDF_24.png"); 
-                            // xmlWriter.WriteAttributeString("width", "24");
-                            // xmlWriter.WriteAttributeString("height", "24");
-                            // xmlWriter.WriteEndElement(); // </img>
                             xmlWriter.WriteEndElement(); // </a>
                             xmlWriter.WriteEndElement(); // </td>
 

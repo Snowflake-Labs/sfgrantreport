@@ -6,94 +6,6 @@ namespace Snowflake.GrantReport.ReportObjects
 {
     public class Grant
     {
-        Dictionary<string, string> privilegeNamesShortDict = new Dictionary<string, string>
-        {
-            // Common
-            {"USAGE", "U"},
-            {"OWNERSHIP", "O"},
-
-            {"MODIFY", "M"},
-            {"MONITOR", "MON"},
-
-            // Database
-            {"CREATE SCHEMA", "SCHM"},
-            {"IMPORTED PRIVILEGES", "IMP_PRV"},
-            {"REFERENCE_USAGE", "REF_USG"},
-
-            // Schema
-            {"ADD SEARCH OPTIMIZATION", "SEO"},
-            {"CREATE EXTERNAL TABLE", "TBL_EXT"},
-            {"CREATE FILE FORMAT", "FF"},
-            {"CREATE FUNCTION", "FUNC"},
-            {"CREATE MASKING POLICY", "MSKPOL"},
-            {"CREATE MATERIALIZED VIEW", "MV"},
-            {"CREATE PIPE", "PIPE"},
-            {"CREATE PROCEDURE", "PROC"},
-            {"CREATE SEQUENCE", "SEQ"},
-            {"CREATE STAGE", "STG"},
-            {"CREATE STREAM", "STRM"},
-            {"CREATE TABLE", "TBL"},
-            {"CREATE TASK", "TASK"},
-            {"CREATE TEMPORARY TABLE", "TBL_TMP"},
-            {"CREATE VIEW", "VIEW"},
-
-            // Table
-            {"INSERT", "C"},
-            {"SELECT", "R"},
-            {"UPDATE", "U"},
-            {"DELETE", "D"},
-            {"TRUNCATE", "T"},
-
-            // View
-            {"REBUILD", "RBLD"},
-            {"REFERENCES", "REF"}
-        };
-
-        Dictionary<string, int> privilegeOrderDict = new Dictionary<string, int>
-        {
-            // Common
-            {"USAGE",       1},
-            {"OWNERSHIP",   2},
-
-            // Database
-            {"CREATE SCHEMA",       120},
-            {"IMPORTED PRIVILEGES", 121},
-            {"REFERENCE_USAGE",     122},
-
-            // Schema
-            {"CREATE TABLE",                200},
-            {"CREATE TEMPORARY TABLE",      201},
-            {"CREATE EXTERNAL TABLE",       202},
-            {"CREATE VIEW",                 203},
-            {"CREATE MATERIALIZED VIEW",    204},
-            {"CREATE PROCEDURE",            205},
-            {"CREATE FUNCTION",             206},
-            {"CREATE STAGE",                207},
-            {"CREATE FILE FORMAT",          208},
-            {"CREATE TASK",                 209},
-            {"CREATE PIPE",                 210},
-            {"CREATE SEQUENCE",             211},
-            {"CREATE STREAM",               212},
-            {"CREATE MASKING POLICY",       213},
-
-            {"ADD SEARCH OPTIMIZATION",     200},
-
-            // Table
-            {"INSERT",      10},
-            {"SELECT",      11},
-            {"UPDATE",      12},
-            {"DELETE",      13},
-            {"TRUNCATE",    14},
-
-            // View
-            {"REBUILD",     15},
-            {"REFERENCES",  16},
-
-            // Common
-            {"MODIFY",      50},
-            {"MONITOR",     51}
-        };
-
         public DateTime CreatedOn { get; set; }
 
         public DateTime CreatedOnUTC
@@ -129,26 +41,109 @@ namespace Snowflake.GrantReport.ReportObjects
             {
                 this._objectName = value;
 
-                string[] nameParts = this._objectName.Split('.');
-                if (nameParts.Length == 0)
+                if (this._objectName.Contains('"') == false)
                 {
-                    this.EntityName = this._objectName.Trim('"');
+                    string[] nameParts = this._objectName.Split('.');
+                    if (nameParts.Length == 0)
+                    {
+                        this.EntityName = this._objectName.Trim('"');
+                    }
+                    else if (nameParts.Length == 1)
+                    {
+                        this.EntityName = this._objectName.Trim('"');
+                    }
+                    else if (nameParts.Length == 2)
+                    {
+                        this.DBName = nameParts[0].Trim('"');
+                        this.SchemaName = nameParts[1].Trim('"');
+                        this.EntityName =  this.SchemaName;
+                    }
+                    else if (nameParts.Length == 3)
+                    {
+                        this.DBName = nameParts[0].Trim('"');
+                        this.SchemaName = nameParts[1].Trim('"');
+                        this.EntityName = nameParts[2].Trim('"');
+                    }
                 }
-                else if (nameParts.Length == 1)
+                else
                 {
-                    this.EntityName = this._objectName.Trim('"');
-                }
-                else if (nameParts.Length == 2)
-                {
-                    this.DBName = nameParts[0].Trim('"');
-                    this.SchemaName = nameParts[1].Trim('"');
-                    this.EntityName = nameParts[1].Trim('"');
-                }
-                else if (nameParts.Length == 3)
-                {
-                    this.DBName = nameParts[0].Trim('"');
-                    this.SchemaName = nameParts[1].Trim('"');
-                    this.EntityName = nameParts[2].Trim('"');
+                    string[] nameParts = this._objectName.Split('.');
+
+                    // The name must contain periods.
+                    // Periods are quoted in double quotes "
+                    // That calls for better parsing
+                    
+                    List<string> firstPartParts = new List<string>();
+                    List<string> secondPartParts = new List<string>();
+                    List<string> thirdPartParts = new List<string>();
+
+                    List<string> currentPart = firstPartParts;
+
+                    bool inQuotedPart = false;
+
+                    foreach (string namePart in nameParts)
+                    {
+                        currentPart.Add(namePart);
+
+                        if (namePart.StartsWith('"') == false && namePart.EndsWith('"') == false)
+                        {
+                            // Unquoted part and therefore without periods
+                            
+                            if (inQuotedPart == false)
+                            {
+                                // Move to next part
+                                if (currentPart == firstPartParts) 
+                                {
+                                    currentPart = secondPartParts;
+                                }
+                                else if (currentPart == secondPartParts) 
+                                {
+                                    currentPart = thirdPartParts;
+                                }
+                            }
+                        }
+                        else if (namePart.StartsWith('"'))
+                        {
+                            // Begin of the quoted part, therefore with periods
+                            
+                            // Keep going
+
+                            inQuotedPart = true;
+                        }
+                        else if (namePart.EndsWith('"'))
+                        {
+                            // End of the quoted part, therefore with periods
+
+                            inQuotedPart = false;
+
+                            if (firstPartParts.Count > 0)
+                            {
+                                currentPart = secondPartParts;
+                            }
+                            if (secondPartParts.Count > 0)
+                            {
+                                currentPart = thirdPartParts;
+                            }
+                        }
+                    }
+                    
+                    if (secondPartParts.Count == 0)
+                    {
+                        this.EntityName = String.Join(".", firstPartParts.ToArray()).Trim('"');
+
+                    }
+                    else if (thirdPartParts.Count == 0)
+                    {
+                        this.DBName = String.Join(".", firstPartParts.ToArray()).Trim('"');
+                        this.SchemaName = String.Join(".", secondPartParts.ToArray()).Trim('"');
+                        this.EntityName =  this.SchemaName;
+                    }
+                    else
+                    {
+                        this.DBName = String.Join(".", firstPartParts.ToArray()).Trim('"');
+                        this.SchemaName = String.Join(".", secondPartParts.ToArray()).Trim('"');
+                        this.EntityName = String.Join(".", thirdPartParts.ToArray()).Trim('"');
+                    }
                 }
             }
         }
@@ -179,51 +174,45 @@ namespace Snowflake.GrantReport.ReportObjects
 
         public string Privilege { get; set; }
 
-        public string PrivilegeDisplayShort
+        public string PrivilegeDisplayShort(Dictionary<string, string> privilegeNamesShortDict)
         { 
-            get
+            string shortName = String.Empty;
+            if (privilegeNamesShortDict.TryGetValue(this.Privilege, out shortName) == true)
             {
-                string shortName = String.Empty;
-                if (privilegeNamesShortDict.TryGetValue(this.Privilege, out shortName) == true)
+                if (this.WithGrantOption == true)
                 {
-                    if (this.WithGrantOption == true)
-                    {
-                        return String.Format("{0}+", shortName);
-                    }
-                    else
-                    {
-                        return shortName;
-                    }
+                    return String.Format("{0}+", shortName);
                 }
                 else
                 {
-                    // Take first two characters
-                    string[] words = this.Privilege.Split(' ');
-                    List<string> shorterWords = new List<string>(words.Length);
-                    foreach (string word in words)
-                    {
-                        shorterWords.Add(word.Substring(0, 2));
-
-                    }
-                    shortName = String.Join('_', shorterWords.ToArray());
                     return shortName;
                 }
             }
+            else
+            {
+                // Take first two characters
+                string[] words = this.Privilege.Split(' ');
+                List<string> shorterWords = new List<string>(words.Length);
+                foreach (string word in words)
+                {
+                    shorterWords.Add(word.Substring(0, 2));
+
+                }
+                shortName = String.Join('_', shorterWords.ToArray());
+                return shortName;
+            }
         }
 
-        public int PrivilegeOrder
+        public int PrivilegeOrder(Dictionary<string, int> privilegeOrderDict)
         { 
-            get
+            int order = -1;
+            if (privilegeOrderDict.TryGetValue(this.Privilege, out order) == true)
             {
-                int order = -1;
-                if (privilegeOrderDict.TryGetValue(this.Privilege, out order) == true)
-                {
-                    return order;
-                }
-                else
-                {
-                    return 1000;
-                }
+                return order;
+            }
+            else
+            {
+                return 1000;
             }
         }
 
