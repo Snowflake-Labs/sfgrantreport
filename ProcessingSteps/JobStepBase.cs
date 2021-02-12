@@ -53,7 +53,12 @@ namespace Snowflake.GrantReport.ProcessingSteps
         {
             return false;
         }
-        
+
+        public virtual bool ShouldExecute(ProgramOptions programOptions)
+        {
+            return false;
+        }
+
         #region Functions for Snowflake object names 
 
         public static string quoteObjectIdentifier(string objectName)
@@ -353,6 +358,9 @@ namespace Snowflake.GrantReport.ProcessingSteps
             l++;
             sheet.Cells[l, 1].Value = "Connection";
             sheet.Cells[l, 2].Value = programOptions.ReportJob.Connection;
+            l++;
+            sheet.Cells[l, 1].Value = "Input Folder";
+            sheet.Cells[l, 2].Value = programOptions.ReportJob.InputFolder;
             l++;
 
             sheet.Column(1).Width = 25;

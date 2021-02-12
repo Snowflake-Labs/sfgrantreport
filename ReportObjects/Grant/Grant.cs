@@ -20,6 +20,24 @@ namespace Snowflake.GrantReport.ReportObjects
             }
         }
 
+        public DateTime? DeletedOn { get; set; }
+
+        public string DisplaySettingWithGrantOption
+        {
+            get
+            {
+                if (this.WithGrantOption == true)
+                {
+                    return "X+";
+                }
+                else
+                {
+                    return "X";
+                }
+
+            }
+        }
+
         public string DBName { get; set; }
 
         public string EntityName { get; set; }
@@ -158,7 +176,11 @@ namespace Snowflake.GrantReport.ReportObjects
                 }
                 else
                 {
-                    if (this.ObjectType == "SCHEMA")
+                    if (this.ObjectType == "DATABASE")
+                    {
+                        return this.DBName;
+                    }
+                    else if (this.ObjectType == "SCHEMA")
                     {
                         return String.Format("{0}.{1}", this.DBName, this.EntityName);
                     }
@@ -230,6 +252,7 @@ namespace Snowflake.GrantReport.ReportObjects
                 }
             }
         }
+
 
         public string SchemaName { get; set; }
 

@@ -107,5 +107,21 @@ namespace Snowflake.GrantReport.ProcessingSteps
                 FileIOHelper.WriteListToCSVFile(stepTimings, new StepTimingReportMap(), FilePathMap.StepTimingReportFilePath(), true);
             }
         }
+
+        public override bool ShouldExecute(ProgramOptions programOptions)
+        {
+            if (programOptions.ConnectionName != null && programOptions.ConnectionName.Length > 0)
+            {
+                logger.Trace("Connection name is not empty. Will execute");
+                loggerConsole.Trace("Connection name is not empty. Will execute");
+                return true;
+            }
+            else
+            {
+                logger.Trace("Connection name is empty. Skipping this step");
+                loggerConsole.Trace("Connection name is empty. Skipping this step");
+                return false;
+            }
+        }
     }
 }

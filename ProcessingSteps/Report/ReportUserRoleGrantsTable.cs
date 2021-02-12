@@ -239,6 +239,11 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
             }
         }
 
+        public override bool ShouldExecute(ProgramOptions programOptions)
+        {
+            return true;
+        }
+
         private void generateExcelReport(ProgramOptions programOptions, List<string> sheetsToIncludeList, string reportFilePath)        
         {
             #region Prepare the report package

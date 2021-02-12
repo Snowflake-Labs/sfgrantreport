@@ -563,6 +563,11 @@ namespace Snowflake.GrantReport
                     {
                         CsvReader csvReader = new CsvReader(sr, CultureInfo.InvariantCulture);
                         csvReader.Configuration.RegisterClassMap(classMap);
+                        csvReader.Configuration.BadDataFound = rc =>
+                        {
+                            logger.Warn("Bad thing on row {0}, char {1}, field '{2}'", rc.Row, rc.CharPosition, rc.Field);
+                            logger.Warn(rc.RawRecord);
+                        };
                         if (skipRecordPrefix.Length > 0)
                         {
                             csvReader.Configuration.ShouldSkipRecord = record => record.FirstOrDefault()?.StartsWith(skipRecordPrefix) ?? false;

@@ -247,6 +247,16 @@ namespace Snowflake.GrantReport.ProcessingSteps
             return Path.Combine(this.Data_Grant_FolderPath(), "ROLE_GRANTS_OF.csv");
         }
 
+        public string Input_RoleShowGrantsOf_FilePath()
+        {
+            return Path.Combine(this.ProgramOptions.InputFolderPath, "GRANTS_TO_USERS.csv");
+        }
+
+        public string Input_RoleShowGrantsToAndOn_FilePath()
+        {
+            return Path.Combine(this.ProgramOptions.InputFolderPath, "GRANTS_TO_ROLES.csv");
+        }
+
         public string Report_RoleDetail_FilePath()
         {
             return Path.Combine(this.Report_Role_FolderPath(), "ROLES.csv");
@@ -299,12 +309,26 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
         public string UsersRolesAndGrantsExcelReportFilePath()
         {
-            return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("UsersRolesGrants.ALL.{0}.{1:yyyyMMddHHmm}.xlsx", this.ProgramOptions.ReportJob.Connection, this.ProgramOptions.ReportJob.DataRetrievedOnUtc));
+            if (this.ProgramOptions.ReportJob.Connection != null && this.ProgramOptions.ReportJob.Connection.Length > 0)
+            {
+                return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("UsersRolesGrants.ALL.{0}.{1:yyyyMMddHHmm}.xlsx", this.ProgramOptions.ReportJob.Connection, this.ProgramOptions.ReportJob.DataRetrievedOnUtc));
+            }
+            else
+            {
+                return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("UsersRolesGrants.ALL.{0}.{1:yyyyMMddHHmm}.xlsx", new DirectoryInfo(this.ProgramOptions.InputFolderPath).Name, this.ProgramOptions.ReportJob.DataRetrievedOnUtc));
+            }
         }
 
         public string UsersRolesAndGrantsExcelReportFilePath(string sheetSetName)
         {
-            return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("UsersRolesGrants.{0}.{1}.{2:yyyyMMddHHmm}.xlsx", sheetSetName, this.ProgramOptions.ReportJob.Connection, this.ProgramOptions.ReportJob.DataRetrievedOnUtc));
+            if (this.ProgramOptions.ReportJob.Connection != null && this.ProgramOptions.ReportJob.Connection.Length > 0)
+            {
+                return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("UsersRolesGrants.{0}.{1}.{2:yyyyMMddHHmm}.xlsx", sheetSetName, this.ProgramOptions.ReportJob.Connection, this.ProgramOptions.ReportJob.DataRetrievedOnUtc));
+            }
+            else
+            {
+                return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("UsersRolesGrants.{0}.{1}.{2:yyyyMMddHHmm}.xlsx", sheetSetName, new DirectoryInfo(this.ProgramOptions.InputFolderPath).Name, this.ProgramOptions.ReportJob.DataRetrievedOnUtc));
+            }
         }
 
         #endregion

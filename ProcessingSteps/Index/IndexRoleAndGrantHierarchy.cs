@@ -58,7 +58,7 @@ namespace Snowflake.GrantReport.ProcessingSteps
                         if (grantsOfRolesList != null)
                         {
                             List<RoleMember> grantsOfRoleToUserList = grantsOfRolesList.Where(g => g.Name == role.Name && g.ObjectType == "USER").ToList();
-                            if (grantsOfRoleToUserList != null)
+                            if (grantsOfRoleToUserList != null && grantsOfRoleToUserList.Count > 0)
                             {
                                 role.AssignedUsers = String.Join(',', grantsOfRoleToUserList.Select(g => g.GrantedTo).ToArray());
                             }
@@ -225,6 +225,8 @@ namespace Snowflake.GrantReport.ProcessingSteps
                         {
                             List<RoleHierarchy> roleHierarchiesList = new List<RoleHierarchy>(grantsToRolesUsageList.Count);
 
+                            j = 0;
+
                             // Build stuff for flow diagrams using the USAGE rights and the role hierarchy
                             foreach (Grant grant in grantsToRolesUsageList)
                             {
@@ -280,7 +282,14 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
                                     roleHierarchiesList.Add(roleHierarchy);
                                 }
+
+                                j++;
+                                if (j % 1000 == 0)
+                                {
+                                    Console.Write("{0}.", j);
+                                }
                             }
+                            Console.WriteLine("Done {0} items", grantsToRolesUsageList.Count);
 
                             // Now loop through the list of roles looking for the stragglers that have no other roles below them or aren't parented to any
                             foreach (Role role in rolesList)
@@ -367,6 +376,11 @@ namespace Snowflake.GrantReport.ProcessingSteps
                 stepTimings.Add(stepTimingFunction);
                 FileIOHelper.WriteListToCSVFile(stepTimings, new StepTimingReportMap(), FilePathMap.StepTimingReportFilePath(), true);
             }
+        }
+
+        public override bool ShouldExecute(ProgramOptions programOptions)
+        {
+            return true;
         }
     }
 }

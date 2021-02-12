@@ -11,7 +11,8 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/bin/Debug/net5.0/SnowGrantReport.dll",
-            "args": ["-c", "sfpscogs_dodievich_sso.west-us-2.azure", "-o", "C:\\snowflake\\GrantReport\\Reports\\dodievich02082021.periods"],
+            // "args": ["-c", "sfpscogs_dodievich_sso.west-us-2.azure", "-o", "C:\\snowflake\\GrantReport\\Reports\\dodievich02082021.periods"],
+            "args": ["-i", "C:\\snowflake\\GrantReport\\Reports\\Account_Usage_Input", "-o", "C:\\snowflake\\GrantReport\\Reports\\Account_Usage_Input_Output"],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "externalTerminal",

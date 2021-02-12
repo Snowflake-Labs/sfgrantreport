@@ -12,6 +12,8 @@ namespace Snowflake.GrantReport
 
         public DateTime DataRetrievedOnUtc { get; set; }
 
+        public string InputFolder { get; set; }
+
         public JobStepRouter.JobStatus Status { get; set; }
 
         public string Version { get; set; }

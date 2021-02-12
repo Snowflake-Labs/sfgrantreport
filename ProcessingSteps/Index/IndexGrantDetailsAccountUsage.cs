@@ -7,7 +7,7 @@ using Snowflake.GrantReport.ReportObjects;
 
 namespace Snowflake.GrantReport.ProcessingSteps
 {
-    public class IndexGrantDetails : JobStepBase
+    public class IndexGrantDetailsAccountUsage : JobStepBase
     {
         public override bool Execute(ProgramOptions programOptions)
         {
@@ -27,81 +27,108 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
             try
             {
+                FileIOHelper.CreateFolder(this.FilePathMap.Data_FolderPath());
+                FileIOHelper.CreateFolder(this.FilePathMap.Data_Role_FolderPath());
+
                 FileIOHelper.CreateFolder(this.FilePathMap.Report_FolderPath());
                 FileIOHelper.CreateFolder(this.FilePathMap.Report_Grant_FolderPath());
                 FileIOHelper.CreateFolder(this.FilePathMap.Report_Role_FolderPath());
-
-                #region Grants OF - Members of Roles (Roles and Users)
-
-                loggerConsole.Info("Process Grants OF");
-
-                List<RoleMember> grantsOfRolesAndUsersList = FileIOHelper.ReadListFromCSVFile<RoleMember>(FilePathMap.Data_RoleShowGrantsOf_FilePath(), new RoleMemberShowGrantsMap(), "No data returned");
-                if (grantsOfRolesAndUsersList != null)
-                {
-                    foreach (RoleMember roleMember in grantsOfRolesAndUsersList)
-                    {
-                        // Unescape special names of roles
-                        roleMember.Name = roleMember.Name.Trim('"');
-                        roleMember.GrantedTo = roleMember.GrantedTo.Trim('"');
-                        roleMember.GrantedBy = roleMember.GrantedBy.Trim('"');
-                    }
-
-                    grantsOfRolesAndUsersList = grantsOfRolesAndUsersList.OrderBy(g => g.ObjectType).ThenBy(g => g.Name).ToList();
-                    
-                    FileIOHelper.WriteListToCSVFile<RoleMember>(grantsOfRolesAndUsersList, new RoleMemberMap(), FilePathMap.Report_RoleMember_FilePath());
-                }
-
-                #endregion
 
                 #region Grants ON and Grants TO grants for everything
 
                 loggerConsole.Info("Process Grants ON and TO");
 
-                List<Grant> grantsOnRolesList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Data_RoleShowGrantsOn_FilePath(), new GrantShowGrantsMap(), "No data returned");
-                List<Grant> grantsToRolesList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Data_RoleShowGrantsTo_FilePath(), new GrantShowGrantsMap(), "No data returned");
+                List<RoleMember> grantsOfRolesList = new List<RoleMember>();
 
-                if (grantsOnRolesList != null && grantsToRolesList != null)
+                List<Grant> grantsOnRolesList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Input_RoleShowGrantsToAndOn_FilePath(), new GrantGrantToRolesMap());
+
+                if (grantsOnRolesList != null)
                 {
-                    loggerConsole.Info("Loaded {0} ON + {1} TO = {2} grants", grantsOnRolesList.Count, grantsToRolesList.Count, grantsOnRolesList.Count + grantsToRolesList.Count);
-
-                    // Combine both ON and TO into one list
-                    List<Grant> grantsNonUniqueList = new List<Grant>(grantsOnRolesList.Count + grantsToRolesList.Count);
-                    grantsNonUniqueList.AddRange(grantsOnRolesList);
-                    grantsNonUniqueList.AddRange(grantsToRolesList);
-
-                    #region Remove duplicates
-
-                    loggerConsole.Info("Removing duplicate grants");
-
-                    // Now remove duplicate USAGE and OWNERSHIP rows using these kinds of IDs
-                    // OWNERSHIP-ROLE-AAD_PROVISIONER-USERADMIN-USERADMIN
-                    // USAGE-ROLE-AAD_PROVISIONER-USERADMIN-USERADMIN
-                    // These occur only on ROLEs and because a role in hierarchy can be seen when parent says SHOW GRANTS ON and child says SHOW GRANTS TO
-                    List<Grant> grantsUniqueList = new List<Grant>(grantsNonUniqueList.Count);
-                    var uniqueGrantsGrouped = grantsNonUniqueList.GroupBy(g => g.UniqueIdentifier);
-                    foreach (var group in uniqueGrantsGrouped)
-                    {
-                        grantsUniqueList.Add(group.First());
-                    }
+                    loggerConsole.Info("Loaded {0} ON and TO grants", grantsOnRolesList.Count);
 
                     // Unescape special names of objects
-                    foreach (Grant grant in grantsUniqueList)
+                    foreach (Grant grant in grantsOnRolesList)
                     {
                         grant.GrantedTo = grant.GrantedTo.Trim('"');
                         grant.GrantedBy = grant.GrantedBy.Trim('"');
+                        // Apparently the ACCOUNT_USAGE casts 'NOTIFICATION_SUBSCRIPTION' to 'NOTIFICATION SUBSCRIPTION'
+                        // And for others that have space
+                        if (grant.ObjectType.Contains(' ') == true)
+                        {
+                            grant.ObjectType = grant.ObjectType.Replace(' ', '_');
+                        }
+
+                        // Escape periods
+                        if (grant.EntityName.Contains('.') == true)
+                        {
+                            grant.EntityName = String.Format("\"{0}\"", grant.EntityName);
+                        }
+                        if (grant.DBName.Contains('.') == true)
+                        {
+                            grant.DBName = String.Format("\"{0}\"", grant.DBName);
+                        }
+                        if (grant.SchemaName.Contains('.') == true)
+                        {
+                            grant.SchemaName = String.Format("\"{0}\"", grant.SchemaName);
+                        }
+                        // Come up with ObjectName from combination of EntityName, etc.                        
+                        if (grant.DBName.Length == 0)
+                        {
+                            // Account level object
+                            grant.ObjectName = grant.EntityName;
+                        }
+                        else
+                        {
+                            if (grant.SchemaName.Length == 0)
+                            {
+                                // DATABASE
+                                grant.ObjectName = grant.EntityName;
+                                grant.DBName = grant.EntityName;
+                            }
+                            else
+                            {
+                                if (grant.ObjectType == "SCHEMA")
+                                {
+                                    grant.ObjectName = String.Format("{0}.{1}", grant.DBName, grant.EntityName);
+                                }
+                                else
+                                {
+                                    grant.ObjectName = String.Format("{0}.{1}.{2}", grant.DBName, grant.SchemaName, grant.EntityName);
+                                }
+                            }
+                        }
+
                     }
 
-                    grantsUniqueList = grantsUniqueList.OrderBy(g => g.ObjectType).ThenBy(g => g.ObjectName).ThenBy(g => g.GrantedTo).ToList();
-                    FileIOHelper.WriteListToCSVFile<Grant>(grantsUniqueList, new GrantMap(), FilePathMap.Report_RoleGrant_FilePath());
+                    grantsOnRolesList.RemoveAll(g => g.DeletedOn.HasValue == true);
 
-                    #endregion
+                    grantsOnRolesList = grantsOnRolesList.OrderBy(g => g.ObjectType).ThenBy(g => g.ObjectName).ThenBy(g => g.GrantedTo).ToList();
+                    FileIOHelper.WriteListToCSVFile<Grant>(grantsOnRolesList, new GrantMap(), FilePathMap.Report_RoleGrant_FilePath());
+
+                    List<Grant> roleUsageGrantsList = grantsOnRolesList.Where(g => g.ObjectType == "ROLE" && g.Privilege == "USAGE").ToList();
+                    if (roleUsageGrantsList != null)
+                    {
+                        foreach (Grant grant in roleUsageGrantsList)
+                        {
+                            RoleMember roleMember = new RoleMember();
+                            roleMember.CreatedOn = grant.CreatedOn;
+                            roleMember.Name = grant.ObjectName;
+                            roleMember.GrantedBy = grant.GrantedBy;
+                            roleMember.GrantedTo = grant.GrantedTo;
+                            roleMember.ObjectType = grant.ObjectType;
+
+                            grantsOfRolesList.Add(roleMember);
+                        }
+
+                        grantsOfRolesList = grantsOfRolesList.OrderBy(g => g.Name).ToList();
+                    }
                     
                     #region Individual Object Types
 
                     loggerConsole.Info("Processing individual Object Types");
 
                     // Break them up by the type
-                    var groupObjectTypesGrouped = grantsUniqueList.GroupBy(g => g.ObjectType);
+                    var groupObjectTypesGrouped = grantsOnRolesList.GroupBy(g => g.ObjectType);
                     List<SingleStringRow> objectTypesList = new List<SingleStringRow>(groupObjectTypesGrouped.Count());
                     foreach (var group in groupObjectTypesGrouped)
                     {                        
@@ -298,6 +325,68 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
                 #endregion
 
+
+                #region Grants OF - Members of Roles (Roles and Users)
+
+                loggerConsole.Info("Process Grants OF Users");
+
+                List<RoleMember> grantsOfUsersList = FileIOHelper.ReadListFromCSVFile<RoleMember>(FilePathMap.Input_RoleShowGrantsOf_FilePath(), new RoleMemberGrantsToUsersMap());
+                if (grantsOfUsersList != null)
+                {
+                    foreach (RoleMember roleMember in grantsOfUsersList)
+                    {
+                        // Unescape special names of roles
+                        roleMember.Name = roleMember.Name.Trim('"');
+                        roleMember.GrantedTo = roleMember.GrantedTo.Trim('"');
+                        roleMember.GrantedBy = roleMember.GrantedBy.Trim('"');
+                    }
+
+                    // Remove deleted items 
+                    grantsOfUsersList.RemoveAll(g => g.DeletedOn.HasValue == true);
+
+                    grantsOfUsersList = grantsOfUsersList.OrderBy(g => g.Name).ToList();
+
+                    List<RoleMember> grantsOfRolesAndUsersList = new List<RoleMember>();
+                    grantsOfRolesAndUsersList.AddRange(grantsOfRolesList);
+                    grantsOfRolesAndUsersList.AddRange(grantsOfUsersList);
+                    
+                    FileIOHelper.WriteListToCSVFile<RoleMember>(grantsOfRolesAndUsersList, new RoleMemberMap(), FilePathMap.Report_RoleMember_FilePath());
+                }
+
+                #endregion
+
+                // Come up with roles list for later steps too
+                List<Role> rolesList = new List<Role>();
+                List<string> rolesInThisAccountList = grantsOnRolesList.Where(g => g.ObjectType == "ROLE").Select(g => g.ObjectName).Distinct().ToList();
+                foreach (string roleName in rolesInThisAccountList)
+                {
+                    Role role = new Role();
+                    role.CreatedOn = DateTime.Now;
+                    role.Name = roleName;
+                    
+                    rolesList.Add(role);
+                }
+                
+                if (rolesList.Where(r => r.Name == "ACCOUNTADMIN").Count() == 0)
+                {
+                    Role role = new Role();
+                    role.CreatedOn = DateTime.Now;
+                    role.Name = "ACCOUNTADMIN";
+
+                    rolesList.Add(role);
+                }
+
+                if (rolesList.Where(r => r.Name == "PUBLIC").Count() == 0)
+                {
+                    Role role = new Role();
+                    role.CreatedOn = DateTime.Now;
+                    role.Name = "PUBLIC";
+
+                    rolesList.Add(role);
+                }
+
+                FileIOHelper.WriteListToCSVFile<Role>(rolesList, new RoleShowRolesMap(), FilePathMap.Data_ShowRoles_FilePath());
+
                 return true;
             }
             catch (Exception ex)
@@ -325,16 +414,16 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
         public override bool ShouldExecute(ProgramOptions programOptions)
         {
-            if (programOptions.ConnectionName != null && programOptions.ConnectionName.Length > 0)
+            if (programOptions.InputFolderPath != null && programOptions.InputFolderPath.Length > 0)
             {
-                logger.Trace("Connection name is not empty. Will execute");
-                loggerConsole.Trace("Connection name is not empty. Will execute");
+                logger.Trace("Input Folder Path is not empty. Will execute");
+                loggerConsole.Trace("Input Folder Path is not empty. Will execute");
                 return true;
             }
             else
             {
-                logger.Trace("Connection name is empty. Skipping this step");
-                loggerConsole.Trace("Connection name is empty. Skipping this step");
+                logger.Trace("Input Folder Path is not empty. Skipping this step");
+                loggerConsole.Trace("Input Folder Path is not empty. Skipping this step");
                 return false;
             }
         }

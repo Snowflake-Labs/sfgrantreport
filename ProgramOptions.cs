@@ -5,8 +5,11 @@ namespace Snowflake.GrantReport
 {
     public class ProgramOptions
     {
-        [Option('c', "connection", Required = true, HelpText = "Name of the SnowSQL connection entry that will be used to connect to Snowflake.")]
+        [Option('c', "connection", Required = true, HelpText = "Name of the SnowSQL connection entry that will be used to connect to Snowflake.", SetName = "extract")]
         public string ConnectionName { get; set; }
+
+        [Option('i', "input-folder", Required = true, HelpText = "Folder where the files from ACCOUNT_USAGE share in SNOWFLAKE database are stored.", SetName = "accountusage")]
+        public string InputFolderPath { get; set; }
 
         [Option('o', "output-folder", Required = false, HelpText = "Output folder where to create report.")]
         public string ReportFolderPath { get; set; }
@@ -20,10 +23,12 @@ namespace Snowflake.GrantReport
 
         public override string ToString()
         {
-            return String.Format("ProgramOptions: ConnectionName='{0}' OutputFolderPath='{1}' DeletePreviousReportOutput='{2}'",
+            return String.Format(
+                "ProgramOptions: ConnectionName='{0}' OutputFolderPath='{1}' DeletePreviousReportOutput='{2}' InputFolderPath='{3}'",
                 this.ConnectionName, 
                 this.ReportFolderPath, 
-                this.DeletePreviousReportOutput);
+                this.DeletePreviousReportOutput,
+                this.InputFolderPath);
         }
     }
 

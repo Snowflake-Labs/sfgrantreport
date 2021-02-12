@@ -80,7 +80,6 @@ namespace Snowflake.GrantReport
 
             // Set up the output job folder and job file path
             programOptions.ReportJobFilePath = Path.Combine(programOptions.ReportFolderPath, "Snowflake.GrantReport.json");
-            //programOptions.ProgramLocationFolderPath = AppDomain.CurrentDomain.BaseDirectory;
             programOptions.ProgramLocationFolderPath = AppContext.BaseDirectory;
 
             // Remove previous job if it exists and it was asked for
@@ -103,6 +102,11 @@ namespace Snowflake.GrantReport
                 Thread.Sleep(2000);
             } 
 
+            if (programOptions.InputFolderPath.Length > 0)
+            {
+                programOptions.InputFolderPath = Path.GetFullPath(programOptions.InputFolderPath);
+            }
+
             // Create Output folder if it doesn't exist
             if (Directory.Exists(programOptions.ReportFolderPath) == false)
             {
@@ -121,6 +125,7 @@ namespace Snowflake.GrantReport
                 ReportJob reportJob = new ReportJob();
                 reportJob.Version = Assembly.GetEntryAssembly().GetName().Version.ToString();
                 reportJob.Connection = programOptions.ConnectionName;
+                reportJob.InputFolder = programOptions.InputFolderPath;
                 reportJob.DataRetrievedOnUtc = DateTime.UtcNow;
                 reportJob.DataRetrievedOn = reportJob.DataRetrievedOnUtc.ToLocalTime();
                 reportJob.Status = JobStepRouter.JobStatus.ExtractCurrentContext;

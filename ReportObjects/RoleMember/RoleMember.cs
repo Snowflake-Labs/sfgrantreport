@@ -19,6 +19,8 @@ namespace Snowflake.GrantReport.ReportObjects
             }
         }
 
+        public DateTime? DeletedOn { get; set; }
+
         public string Name { get; set; }
 
         public string GrantedBy { get; set; }

@@ -410,6 +410,11 @@ namespace Snowflake.GrantReport.ProcessingSteps
             }
         }
 
+        public override bool ShouldExecute(ProgramOptions programOptions)
+        {
+            return true;
+        }
+
         private static string getRoleStyleAttribute(Role role)
         {
             string styleAttribute = String.Empty;;

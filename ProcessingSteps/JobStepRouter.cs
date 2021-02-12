@@ -17,7 +17,8 @@ namespace Snowflake.GrantReport.ProcessingSteps
             // Index steps
             IndexUserDetails = 200,
             IndexGrantDetails = 201,
-            IndexRoleAndGrantHierarchy = 202,
+            IndexGrantDetailsAccountUsage = 202,
+            IndexRoleAndGrantHierarchy = 203,
 
             // Report steps
             ReportUserRoleGrantsTable = 300,
@@ -37,6 +38,7 @@ namespace Snowflake.GrantReport.ProcessingSteps
                 // Index data
                 JobStatus.IndexUserDetails,
                 JobStatus.IndexGrantDetails,
+                JobStatus.IndexGrantDetailsAccountUsage,
                 JobStatus.IndexRoleAndGrantHierarchy,
 
                 // Report data
@@ -65,9 +67,12 @@ namespace Snowflake.GrantReport.ProcessingSteps
                 JobStepBase jobStep = getJobStepFromFactory(programOptions.ReportJob.Status);
                 if (jobStep != null)
                 {
-                    if (jobStep.Execute(programOptions) == false)
+                    if (jobStep.ShouldExecute(programOptions) == true)
                     {
-                        programOptions.ReportJob.Status = JobStatus.Error;
+                        if (jobStep.Execute(programOptions) == false)
+                        {
+                            programOptions.ReportJob.Status = JobStatus.Error;
+                        }
                     }
                 }
                 if (programOptions.ReportJob.Status != JobStatus.Error)
@@ -97,6 +102,8 @@ namespace Snowflake.GrantReport.ProcessingSteps
                     return new IndexUserDetails();
                 case JobStatus.IndexGrantDetails:
                     return new IndexGrantDetails();
+                case JobStatus.IndexGrantDetailsAccountUsage:
+                    return new IndexGrantDetailsAccountUsage();
                 case JobStatus.IndexRoleAndGrantHierarchy:
                     return new IndexRoleAndGrantHierarchy();
 
