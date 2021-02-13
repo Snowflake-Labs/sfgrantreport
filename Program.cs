@@ -102,7 +102,7 @@ namespace Snowflake.GrantReport
                 Thread.Sleep(2000);
             } 
 
-            if (programOptions.InputFolderPath.Length > 0)
+            if (programOptions.InputFolderPath != null && programOptions.InputFolderPath.Length > 0)
             {
                 programOptions.InputFolderPath = Path.GetFullPath(programOptions.InputFolderPath);
             }
