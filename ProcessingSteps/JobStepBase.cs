@@ -135,19 +135,19 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
             // Load selected types of grants to visualize
             List<Grant> grantsToAccountList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("ACCOUNT"), new GrantMap());
-            loggerConsole.Trace("Grants in Accounts {0}", grantsToAccountList.Count);
+            if (grantsToAccountList != null) loggerConsole.Trace("Grants in Accounts {0}", grantsToAccountList.Count);
 
             List<Grant> grantsToDatabaseList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("DATABASE"), new GrantMap());
-            loggerConsole.Trace("Grants in Databases {0}", grantsToDatabaseList.Count);
+            if (grantsToDatabaseList != null) loggerConsole.Trace("Grants in Databases {0}", grantsToDatabaseList.Count);
 
             List<Grant> grantsToSchemaList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("SCHEMA"), new GrantMap());
-            loggerConsole.Trace("Grants in Schemas {0}", grantsToSchemaList.Count);
+            if (grantsToSchemaList != null) loggerConsole.Trace("Grants in Schemas {0}", grantsToSchemaList.Count);
 
             List<Grant> grantsToTableList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("TABLE"), new GrantMap());
-            loggerConsole.Trace("Grants in Tables {0}", grantsToTableList.Count);
+            if (grantsToTableList != null) loggerConsole.Trace("Grants in Tables {0}", grantsToTableList.Count);
 
             List<Grant> grantsToViewList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("VIEW"), new GrantMap());
-            loggerConsole.Trace("Grants in Views {0}", grantsToViewList.Count);
+            if (grantsToViewList!= null) loggerConsole.Trace("Grants in Views {0}", grantsToViewList.Count);
 
             Account account = new Account();
             account.FullName = "TODO";

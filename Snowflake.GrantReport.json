@@ -1,8 +1,0 @@
-{
-  "Connection": "aws_cas1",
-  "DataRetrievedOn": "2021-02-12T15:44:34.0404834-08:00",
-  "DataRetrievedOnUtc": "2021-02-12T23:44:34.0404834Z",
-  "InputFolder": null,
-  "Status": 100,
-  "Version": "2021.2.12.0"
-}
