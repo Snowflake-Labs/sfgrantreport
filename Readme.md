@@ -13,7 +13,7 @@ snowsql -v
 ```
 You should see `snowsql` executable output something similar to this:
 ```
-Version: 1.2.11
+Version: 1.2.12
 ```
 
 ## GraphViz
