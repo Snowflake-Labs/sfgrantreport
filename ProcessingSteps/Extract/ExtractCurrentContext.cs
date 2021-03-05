@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
+using System.Reflection;
 using Snowflake.GrantReport.ReportObjects;
 
 namespace Snowflake.GrantReport.ProcessingSteps
@@ -39,6 +40,8 @@ namespace Snowflake.GrantReport.ProcessingSteps
                 FileIOHelper.CreateFolder(this.FilePathMap.Data_Account_FolderPath());
 
                 StringBuilder sb = new StringBuilder(1024);
+                sb.AppendFormat("ALTER SESSION SET QUERY_TAG='Snowflake Grant Report Version {0}';", Assembly.GetEntryAssembly().GetName().Version); sb.AppendLine();
+
                 sb.AppendLine("!set output_format=csv");
                 sb.AppendLine("!set header=true");
 

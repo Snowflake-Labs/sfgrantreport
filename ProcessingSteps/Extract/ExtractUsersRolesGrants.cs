@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
+using System.Reflection;
 
 namespace Snowflake.GrantReport.ProcessingSteps
 {
@@ -44,12 +45,17 @@ namespace Snowflake.GrantReport.ProcessingSteps
                 loggerConsole.Info("Retrieving list of roles and users");
 
                 StringBuilder sb = new StringBuilder(1024);
+                
+                sb.AppendFormat("ALTER SESSION SET QUERY_TAG='Snowflake Grant Report Version {0}';", Assembly.GetEntryAssembly().GetName().Version); sb.AppendLine();
+
                 sb.AppendLine("!set output_format=csv");
                 sb.AppendLine("!set header=true");
+
                 sb.AppendLine("USE ROLE SECURITYADMIN;");
                 sb.AppendFormat("!spool \"{0}\"", FilePathMap.Data_ShowRoles_FilePath()); sb.AppendLine();
                 sb.AppendLine("SHOW ROLES;");
                 sb.AppendLine(@"!spool off");
+
                 sb.AppendFormat("!spool \"{0}\"", FilePathMap.Data_ShowUsers_FilePath()); sb.AppendLine();
                 sb.AppendLine("SHOW USERS;");
                 sb.AppendLine(@"!spool off");
@@ -68,10 +74,14 @@ namespace Snowflake.GrantReport.ProcessingSteps
                     loggerConsole.Info("Retrieving user details for {0} users", usersList.Count);
 
                     sb = new StringBuilder(256 * usersList.Count);
+                
+                    sb.AppendFormat("ALTER SESSION SET QUERY_TAG='Snowflake Grant Report Version {0}';", Assembly.GetEntryAssembly().GetName().Version); sb.AppendLine();
+
                     sb.AppendLine("!set output_format=csv");
+                    sb.AppendLine("!set header=true");
+
                     sb.AppendLine("USE ROLE SECURITYADMIN;");
                     sb.AppendLine("USE ROLE ACCOUNTADMIN;");
-                    sb.AppendLine("!set header=true");
 
                     for (int i = 0; i< usersList.Count; i++)
                     {
@@ -99,9 +109,13 @@ namespace Snowflake.GrantReport.ProcessingSteps
                     loggerConsole.Info("Retrieving role grants ON for {0} roles", rolesList.Count);
 
                     sb = new StringBuilder(256 * rolesList.Count);
+
+                    sb.AppendFormat("ALTER SESSION SET QUERY_TAG='Snowflake Grant Report Version {0}';", Assembly.GetEntryAssembly().GetName().Version); sb.AppendLine();
+
                     sb.AppendLine("!set output_format=csv");
-                    sb.AppendLine("USE ROLE SECURITYADMIN;");
                     sb.AppendLine("!set header=true");
+
+                    sb.AppendLine("USE ROLE SECURITYADMIN;");
                     sb.AppendFormat("!spool \"{0}\"", FilePathMap.Data_RoleShowGrantsOn_FilePath()); sb.AppendLine();
                     for (int i = 0; i< rolesList.Count; i++)
                     {
@@ -122,9 +136,13 @@ namespace Snowflake.GrantReport.ProcessingSteps
                     loggerConsole.Info("Retrieving role grants TO for {0} roles", rolesList.Count);
 
                     sb = new StringBuilder(256 * rolesList.Count);
+
+                    sb.AppendFormat("ALTER SESSION SET QUERY_TAG='Snowflake Grant Report Version {0}';", Assembly.GetEntryAssembly().GetName().Version); sb.AppendLine();
+
                     sb.AppendLine("!set output_format=csv");
-                    sb.AppendLine("USE ROLE SECURITYADMIN;");
                     sb.AppendLine("!set header=true");
+
+                    sb.AppendLine("USE ROLE SECURITYADMIN;");
                     sb.AppendFormat("!spool \"{0}\"", FilePathMap.Data_RoleShowGrantsTo_FilePath()); sb.AppendLine();
                     for (int i = 0; i< rolesList.Count; i++)
                     {
@@ -145,9 +163,12 @@ namespace Snowflake.GrantReport.ProcessingSteps
                     loggerConsole.Info("Retrieving role grants OF for {0} roles", rolesList.Count);
 
                     sb = new StringBuilder(256 * rolesList.Count);
+                    sb.AppendFormat("ALTER SESSION SET QUERY_TAG='Snowflake Grant Report Version {0}';", Assembly.GetEntryAssembly().GetName().Version); sb.AppendLine();
+
                     sb.AppendLine("!set output_format=csv");
-                    sb.AppendLine("USE ROLE SECURITYADMIN;");
                     sb.AppendLine("!set header=true");
+
+                    sb.AppendLine("USE ROLE SECURITYADMIN;");
                     sb.AppendFormat("!spool \"{0}\"", FilePathMap.Data_RoleShowGrantsOf_FilePath()); sb.AppendLine();
                     for (int i = 0; i< rolesList.Count; i++)
                     {
