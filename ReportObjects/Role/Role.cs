@@ -95,7 +95,7 @@ namespace Snowflake.GrantReport.ReportObjects
             get
             {
                 List<string> allPaths = new List<string>();
-                GetParentPaths(this, this.Name, allPaths);
+                GetParentPaths(this, this.Name, allPaths, 25);
                 string[] ancestryPathsArray = allPaths.Select(p => p.ToString()).ToArray();
                 this.NumAncestryPaths = ancestryPathsArray.Length;
                 return String.Join('\n', ancestryPathsArray);
@@ -146,7 +146,7 @@ namespace Snowflake.GrantReport.ReportObjects
             }
         }
 
-        public void GetParentPaths(Role thisRole, string pathSoFar, List<string> allPaths)
+        public void GetParentPaths(Role thisRole, string pathSoFar, List<string> allPaths, int maxPathsToReturn)
         {
             if (thisRole.ParentRoles.Count == 0) 
             {
@@ -157,11 +157,37 @@ namespace Snowflake.GrantReport.ReportObjects
                 foreach (Role parentRole in thisRole.ParentRoles)
                 {
                     string pathSoFar1 = String.Format(@"{1}->{0}", pathSoFar, parentRole.Name);
-                    GetParentPaths(parentRole, pathSoFar1, allPaths);
+                    GetParentPaths(parentRole, pathSoFar1, allPaths, maxPathsToReturn);
+                    if (allPaths.Count >= maxPathsToReturn) 
+                    {
+                        return;
+                    }
                 }
                 return;
             }
         }
+
+        // public void GetParentPaths(Role thisRole, StringBuilder pathSoFar, List<string> allPaths, int maxPathsToReturn)
+        // {
+        //     if (thisRole.ParentRoles.Count == 0) 
+        //     {
+        //         allPaths.Add(pathSoFar.ToString());
+        //     }
+        //     else
+        //     {
+        //         foreach (Role parentRole in thisRole.ParentRoles)
+        //         {
+        //             pathSoFar.Insert(0, String.Format("{0}->", parentRole.Name));
+        //             //string pathSoFar1 = String.Format(@"{1}->{0}", pathSoFar, parentRole.Name);
+        //             GetParentPaths(parentRole, pathSoFar, allPaths, maxPathsToReturn);
+        //             if (allPaths.Count >= maxPathsToReturn) 
+        //             {
+        //                 return;
+        //             }
+        //         }
+        //         return;
+        //     }
+        // }
 
         public void GetAllParentRoles(Role thisRole, List<Role> listOfRoles)
         {
@@ -180,7 +206,7 @@ namespace Snowflake.GrantReport.ReportObjects
             }
         }
 
-        public void GetAllParentRoleHierarchies(Role thisRole, List<RoleHierarchy> listOfRoleHierarchies)
+        public void GetAllParentRoleHierarchies(Role thisRole, List<RoleHierarchy> listOfRoleHierarchies, int maxHierarchies)
         {
             if (thisRole.ParentRoles.Count == 0) 
             {
@@ -198,7 +224,11 @@ namespace Snowflake.GrantReport.ReportObjects
                     roleHierarchy.NumAncestryPaths = roleHierarchy.AncestryPaths.Split('\n').Count();
                     roleHierarchy.DirectAncestry = String.Format("{0}->{1}", roleHierarchy.GrantedTo, roleHierarchy.Name);
                     listOfRoleHierarchies.Add(roleHierarchy);
-                    GetAllParentRoleHierarchies(parentRole, listOfRoleHierarchies);
+                    if (listOfRoleHierarchies.Count >= maxHierarchies)
+                    {
+                        return;
+                    } 
+                    GetAllParentRoleHierarchies(parentRole, listOfRoleHierarchies, maxHierarchies);
                 }
                 return;
             }
@@ -221,7 +251,7 @@ namespace Snowflake.GrantReport.ReportObjects
             }
         }
 
-        public void GetAllChildRoleHierarchies(Role thisRole, List<RoleHierarchy> listOfRoleHierarchies)
+        public void GetAllChildRoleHierarchies(Role thisRole, List<RoleHierarchy> listOfRoleHierarchies, int maxHierarchies)
         {
             if (thisRole.ChildRoles.Count == 0) 
             {
@@ -239,7 +269,11 @@ namespace Snowflake.GrantReport.ReportObjects
                     roleHierarchy.NumAncestryPaths = roleHierarchy.AncestryPaths.Split('\n').Count();
                     roleHierarchy.DirectAncestry = String.Format("{0}->{1}", roleHierarchy.GrantedTo, roleHierarchy.Name);
                     listOfRoleHierarchies.Add(roleHierarchy);
-                    GetAllChildRoleHierarchies(childRole, listOfRoleHierarchies);
+                    if (listOfRoleHierarchies.Count >= maxHierarchies)
+                    {
+                        return;
+                    } 
+                    GetAllChildRoleHierarchies(childRole, listOfRoleHierarchies, maxHierarchies);
                 }
                 return;
             }

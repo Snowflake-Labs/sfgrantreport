@@ -191,7 +191,7 @@ namespace Snowflake.GrantReport.ProcessingSteps
                     if (j % 100 == 0)
                     {
                         Console.Write("{0}.", j);
-                    }                   
+                    }
                 }
                 Console.WriteLine();
                 loggerConsole.Info("Done {0} Databases", j);

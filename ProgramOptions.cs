@@ -17,6 +17,9 @@ namespace Snowflake.GrantReport
         [Option('d', "delete-previous-report-output", Required = false, HelpText = "If true, delete any results of previous processing.")]
         public bool DeletePreviousReportOutput { get; set; }
 
+        [Option('s', "sequential-processing", Required = false, HelpText = "If true, process certain items during extraction and conversion sequentially.")]
+        public bool ProcessSequentially { get; set; }
+
         public string ReportJobFilePath { get; set; }
         public ReportJob ReportJob { get; set; }
         public string ProgramLocationFolderPath { get; set; }
@@ -24,11 +27,12 @@ namespace Snowflake.GrantReport
         public override string ToString()
         {
             return String.Format(
-                "ProgramOptions: ConnectionName='{0}' OutputFolderPath='{1}' DeletePreviousReportOutput='{2}' InputFolderPath='{3}'",
+                "ProgramOptions: ConnectionName='{0}' OutputFolderPath='{1}' DeletePreviousReportOutput='{2}' InputFolderPath='{3}' ProcessSequentially='{4}'",
                 this.ConnectionName, 
                 this.ReportFolderPath, 
                 this.DeletePreviousReportOutput,
-                this.InputFolderPath);
+                this.InputFolderPath,
+                this.ProcessSequentially);
         }
     }
 

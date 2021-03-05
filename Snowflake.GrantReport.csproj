@@ -7,9 +7,9 @@
     <AssemblyName>SnowGrantReport</AssemblyName>
     <RootNamespace>Snowflake.GrantReport</RootNamespace>
 
-    <Version>2021.2.23.0</Version>
-    <FileVersion>2021.2.23.0</FileVersion>
-    <AssemblyVersion>2021.2.23.0</AssemblyVersion>
+    <Version>2021.3.4.0</Version>
+    <FileVersion>2021.3.4.0</FileVersion>
+    <AssemblyVersion>2021.3.4.0</AssemblyVersion>
     <Authors>Daniel Odievich (daniel.odievich@snowflake.com)</Authors>
     <Company>Snowflake Computing</Company>
     <Product>Snowflake Grant Report</Product>

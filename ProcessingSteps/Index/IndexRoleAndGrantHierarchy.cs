@@ -65,7 +65,7 @@ namespace Snowflake.GrantReport.ProcessingSteps
                         }
 
                         j++;
-                        if (j % 10 == 0)
+                        if (j % 50 == 0)
                         {
                             Console.Write("{0}.", j);
                         }
@@ -100,10 +100,38 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
                     // Load selected types of grants to use to determine whether the role is Functional or Access
                     // Going to just use SCHEMA and TABLE
-                    List<Grant> grantsToSchemaList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("SCHEMA"), new GrantMap());
-                    List<Grant> grantsToTableList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("TABLE"), new GrantMap());
-                    List<Grant> grantsToViewList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("VIEW"), new GrantMap());
-                    List<Grant> grantsToRoleList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("ROLE"), new GrantMap());
+                    List<Grant> grantsToSchemaAllList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("SCHEMA"), new GrantMap());
+                    List<Grant> grantsToTableAllList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("TABLE"), new GrantMap());
+                    List<Grant> grantsToViewAllList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("VIEW"), new GrantMap());
+                    List<Grant> grantsToRoleAllList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Report_RoleGrant_ObjectType_FilePath("ROLE"), new GrantMap());
+
+                    Dictionary<string, List<Grant>> grantsToSchemaDict = new Dictionary<string, List<Grant>>();
+                    Dictionary<string, List<Grant>> grantsToTableDict = new Dictionary<string, List<Grant>>();
+                    Dictionary<string, List<Grant>> grantsToViewDict = new Dictionary<string, List<Grant>>();
+                    Dictionary<string, List<Grant>> grantsToRoleDict = new Dictionary<string, List<Grant>>();
+
+                    var grantsToSchemaGroups = grantsToSchemaAllList.GroupBy(g => g.GrantedTo);
+                    foreach (var grantsGroup in grantsToSchemaGroups)
+                    {
+                        grantsToSchemaDict.Add(grantsGroup.Key, grantsGroup.ToList());
+                    }
+                    var grantsToTableGroups = grantsToTableAllList.GroupBy(g => g.GrantedTo);
+                    foreach (var grantsGroup in grantsToTableGroups)
+                    {
+                        grantsToTableDict.Add(grantsGroup.Key, grantsGroup.ToList());
+                    }
+                    var grantsToViewGroups = grantsToViewAllList.GroupBy(g => g.GrantedTo);
+                    foreach (var grantsGroup in grantsToViewGroups)
+                    {
+                        grantsToViewDict.Add(grantsGroup.Key, grantsGroup.ToList());
+                    }
+                    var grantsToRoleGroups = grantsToRoleAllList.GroupBy(g => g.GrantedTo);
+                    foreach (var grantsGroup in grantsToRoleGroups)
+                    {
+                        grantsToRoleDict.Add(grantsGroup.Key, grantsGroup.ToList());
+                    }
+
+                    j = 0;
 
                     // Detect role types and inheritance rollups
                     foreach(Role role in rolesList)
@@ -137,6 +165,14 @@ namespace Snowflake.GrantReport.ProcessingSteps
                                 }
 
                                 // Check between Functional and Access
+                                List<Grant> grantsToSchemaList = null;
+                                List<Grant> grantsToTableList = null;
+                                List<Grant> grantsToViewList = null;
+                                List<Grant> grantsToRoleList = null;
+                                grantsToSchemaDict.TryGetValue(role.Name, out grantsToSchemaList);
+                                grantsToTableDict.TryGetValue(role.Name, out grantsToTableList);
+                                grantsToViewDict.TryGetValue(role.Name, out grantsToViewList);
+                                grantsToRoleDict.TryGetValue(role.Name, out grantsToRoleList);
 
                                 // Schemas first
                                 if (role.Type == RoleType.Unknown && grantsToSchemaList != null)
@@ -170,7 +206,7 @@ namespace Snowflake.GrantReport.ProcessingSteps
                                 // Views third, and only if the role type is still undetermined
                                 if (role.Type == RoleType.Unknown && grantsToViewList != null)
                                 {
-                                    List<Grant> grantsToViewForThisRoleList = grantsToTableList.Where(
+                                    List<Grant> grantsToViewForThisRoleList = grantsToViewList.Where(
                                         g => g.GrantedTo == role.Name && 
                                         g.Privilege != "USAGE" && 
                                         g.Privilege != "OWNERSHIP" && 
@@ -213,7 +249,14 @@ namespace Snowflake.GrantReport.ProcessingSteps
                                 }
                             }
                         }
+
+                        j++;
+                        if (j % 50 == 0)
+                        {
+                            Console.Write("{0}.", j);
+                        }
                     }
+                    Console.WriteLine("Done {0} items", rolesList.Count);
 
                     loggerConsole.Info("Building role ancestry paths");
 
@@ -224,6 +267,8 @@ namespace Snowflake.GrantReport.ProcessingSteps
                         if (grantsToRolesUsageList != null)
                         {
                             List<RoleHierarchy> roleHierarchiesList = new List<RoleHierarchy>(grantsToRolesUsageList.Count);
+
+                            loggerConsole.Info("Processing Role Usage for {0} hierarchy records", grantsToRolesUsageList.Count);
 
                             j = 0;
 
@@ -291,6 +336,10 @@ namespace Snowflake.GrantReport.ProcessingSteps
                             }
                             Console.WriteLine("Done {0} items", grantsToRolesUsageList.Count);
 
+                            loggerConsole.Info("Looking for stragglers without parents or children for {0} roles", rolesList.Count);
+
+                            j = 0;
+
                             // Now loop through the list of roles looking for the stragglers that have no other roles below them or aren't parented to any
                             foreach (Role role in rolesList)
                             {
@@ -306,8 +355,26 @@ namespace Snowflake.GrantReport.ProcessingSteps
                                 
                                     roleHierarchiesList.Add(roleHierarchy);
                                 }
+
+                                j++;
+                                if (j % 50 == 0)
+                                {
+                                    Console.Write("{0}.", j);
+                                }
                             }
-                            
+                            Console.WriteLine("Done {0} items", rolesList.Count);
+
+                            roleHierarchiesList = roleHierarchiesList.OrderBy(r => r.Name).ThenBy(r => r.GrantedTo).ToList();
+                            FileIOHelper.WriteListToCSVFile<RoleHierarchy>(roleHierarchiesList, new RoleHierarchyMap(), FilePathMap.Report_RoleHierarchy_FilePath());
+
+                            roleHierarchiesList = null;
+
+                            GC.Collect();
+
+                            j = 0;
+
+                            loggerConsole.Info("Processing Role hierarchy for {0} roles", rolesList.Count);
+
                             // For each role, output the hierarchy records that relate to its parents and children
                             foreach (Role role in rolesList)
                             {
@@ -326,8 +393,8 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
                                 // Get hierarchy of roles
                                 List<RoleHierarchy> thisRoleAndItsRelationsHierarchiesNonUniqueList = new List<RoleHierarchy>(100);
-                                role.GetAllParentRoleHierarchies(role, thisRoleAndItsRelationsHierarchiesNonUniqueList);
-                                role.GetAllChildRoleHierarchies(role, thisRoleAndItsRelationsHierarchiesNonUniqueList);
+                                role.GetAllParentRoleHierarchies(role, thisRoleAndItsRelationsHierarchiesNonUniqueList, 10000);
+                                role.GetAllChildRoleHierarchies(role, thisRoleAndItsRelationsHierarchiesNonUniqueList, 10000);
                                 // Filter to only unique items
                                 var thisRoleAndItsRelationsHierarchiesGrouped = thisRoleAndItsRelationsHierarchiesNonUniqueList.GroupBy(r => String.Format("{0}-{1}", r.Name, r.GrantedTo));
                                 List<RoleHierarchy> thisRoleAndItsRelationsHierarchiesList = new List<RoleHierarchy>(thisRoleAndItsRelationsHierarchiesGrouped.Count());
@@ -340,10 +407,15 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
                                 FileIOHelper.WriteListToCSVFile<Role>(thisRoleAndItsRelationsList, new RoleMap(), FilePathMap.Report_RoleDetail_RoleAndItsRelations_FilePath(role.Name));
                                 FileIOHelper.WriteListToCSVFile<RoleHierarchy>(thisRoleAndItsRelationsHierarchiesList, new RoleHierarchyMap(), FilePathMap.Report_RoleHierarchy_RoleAndItsRelations_FilePath(role.Name));
-                            }
 
-                            roleHierarchiesList = roleHierarchiesList.OrderBy(r => r.Name).ThenBy(r => r.GrantedTo).ToList();
-                            FileIOHelper.WriteListToCSVFile<RoleHierarchy>(roleHierarchiesList, new RoleHierarchyMap(), FilePathMap.Report_RoleHierarchy_FilePath());
+                                j++;
+                                if (j % 50 == 0)
+                                {
+                                    Console.Write("{0}.", j);
+                                }
+                            }
+                            Console.WriteLine("Done {0} items", rolesList.Count);
+
                         }
                     }
 

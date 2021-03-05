@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 using Snowflake.GrantReport.ReportObjects;
 
@@ -51,213 +53,236 @@ namespace Snowflake.GrantReport.ProcessingSteps
                     Role syntheticRoleAll = new Role();
                     syntheticRoleAll.Name = "ALL_ROLES_TOGETHER_SYNTHETIC";
                     rolesList.Insert(0, syntheticRoleAll);
-                    
-                    // Create a graphviz file for each role
-                    foreach (Role role in rolesList)
+
+                    ParallelOptions parallelOptions = new ParallelOptions();
+                    if (programOptions.ProcessSequentially == true)
                     {
-                        loggerConsole.Info("Processing visualization for {0}", role);
+                        parallelOptions.MaxDegreeOfParallelism = 1;
+                    }
 
-                        List<RoleHierarchy> thisRoleAndItsRelationsHierarchiesList = FileIOHelper.ReadListFromCSVFile<RoleHierarchy>(FilePathMap.Report_RoleHierarchy_RoleAndItsRelations_FilePath(role.Name), new RoleHierarchyMap());;
-                        List<Role> thisRoleAndItsRelationsList = FileIOHelper.ReadListFromCSVFile<Role>(FilePathMap.Report_RoleDetail_RoleAndItsRelations_FilePath(role.Name), new RoleMap());
+                    int j = 0;
 
-                        if (role == syntheticRoleAll)
+                    Parallel.ForEach<Role, int>(
+                        rolesList,
+                        parallelOptions,
+                        () => 0,
+                        (role, loop, subtotal) =>
                         {
-                            thisRoleAndItsRelationsHierarchiesList = FileIOHelper.ReadListFromCSVFile<RoleHierarchy>(FilePathMap.Report_RoleHierarchy_FilePath(), new RoleHierarchyMap());;
-                            thisRoleAndItsRelationsList = FileIOHelper.ReadListFromCSVFile<Role>(FilePathMap.Report_RoleDetail_FilePath(), new RoleMap());
-                        }
+                            logger.Info("Processing visualization for {0}", role);  
 
-                        if (thisRoleAndItsRelationsList != null && thisRoleAndItsRelationsHierarchiesList != null)
-                        {
-                            Dictionary<string, Role> rolesDict = thisRoleAndItsRelationsList.ToDictionary(k => k.Name, r => r);
-                            Dictionary<string, Role> roleNamesOutput = new Dictionary<string, Role>(thisRoleAndItsRelationsList.Count);
-                            Role roleBeingOutput = null;
+                            List<RoleHierarchy> thisRoleAndItsRelationsHierarchiesList = FileIOHelper.ReadListFromCSVFile<RoleHierarchy>(FilePathMap.Report_RoleHierarchy_RoleAndItsRelations_FilePath(role.Name), new RoleHierarchyMap());;
+                            List<Role> thisRoleAndItsRelationsList = FileIOHelper.ReadListFromCSVFile<Role>(FilePathMap.Report_RoleDetail_RoleAndItsRelations_FilePath(role.Name), new RoleMap());
 
-                            StringBuilder sbGraphViz = new StringBuilder(64 * thisRoleAndItsRelationsHierarchiesList.Count + 128);
-
-                            // Start the graph and set its default settings
-                            sbGraphViz.AppendLine("digraph {");
-                            sbGraphViz.AppendLine(" layout=\"dot\";");
-                            sbGraphViz.AppendLine(" rankdir=\"TB\";");
-                            sbGraphViz.AppendLine(" center=true;");
-                            sbGraphViz.AppendLine(" splines=\"ortho\";");
-                            sbGraphViz.AppendLine(" overlap=false;");
-                            //sbGraphViz.AppendLine(" colorscheme=\"SVG\";");
-                            sbGraphViz.AppendLine(" node [shape=\"rect\" style=\"filled,rounded\" fontname=\"Courier New\"];");
-                            sbGraphViz.AppendLine(" edge [fontname=\"Courier New\"];");
-
-                            sbGraphViz.AppendFormat(" // Graph for the Role {0}", role); sbGraphViz.AppendLine();
-
-                            #region Role boxes
-
-                            // Role boxes
-                            sbGraphViz.AppendLine();
-                            sbGraphViz.AppendLine(" // Roles");
-                            sbGraphViz.AppendLine  ("  subgraph cluster_roles {");
-                            sbGraphViz.AppendFormat("   label = \"roles related to: {0}\";", role); sbGraphViz.AppendLine();
-                            foreach (RoleHierarchy roleHierarchy in thisRoleAndItsRelationsHierarchiesList)
+                            if (role == syntheticRoleAll)
                             {
-                                if (roleHierarchy.GrantedTo != "<NOTHING>" && roleNamesOutput.ContainsKey(roleHierarchy.GrantedTo) == false)
-                                {
-                                    // Name of the role with color
-                                    rolesDict.TryGetValue(roleHierarchy.GrantedTo, out roleBeingOutput);
-                                    sbGraphViz.AppendFormat("  \"{0}\"{1};", roleHierarchy.GrantedTo.Replace("\"", "\\\""), getRoleStyleAttribute(roleBeingOutput)); sbGraphViz.AppendLine();
-                                    roleNamesOutput.Add(roleHierarchy.GrantedTo, roleBeingOutput);
-                                }
-                                
-                                if (roleNamesOutput.ContainsKey(roleHierarchy.Name) == false)
-                                {
-                                    // Name of the role with color
-                                    rolesDict.TryGetValue(roleHierarchy.Name, out roleBeingOutput);
-                                    sbGraphViz.AppendFormat("  \"{0}\"{1};", roleHierarchy.Name.Replace("\"", "\\\""), getRoleStyleAttribute(roleBeingOutput)); sbGraphViz.AppendLine();
-                                    roleNamesOutput.Add(roleHierarchy.Name, roleBeingOutput);
-                                }
+                                thisRoleAndItsRelationsHierarchiesList = FileIOHelper.ReadListFromCSVFile<RoleHierarchy>(FilePathMap.Report_RoleHierarchy_FilePath(), new RoleHierarchyMap());;
+                                thisRoleAndItsRelationsList = FileIOHelper.ReadListFromCSVFile<Role>(FilePathMap.Report_RoleDetail_FilePath(), new RoleMap());
                             }
-                            sbGraphViz.AppendLine("  }// /Roles");
 
-                            #endregion
-
-                            #region Role hierachy
-
-                            // Role connections
-                            sbGraphViz.AppendLine();
-                            sbGraphViz.AppendLine(" // Role hierarchy");
-                            foreach (RoleHierarchy roleHierarchy in thisRoleAndItsRelationsHierarchiesList)
+                            if (thisRoleAndItsRelationsList != null && thisRoleAndItsRelationsHierarchiesList != null)
                             {
-                                if (roleHierarchy.GrantedTo == "<NOTHING>") continue;
+                                Dictionary<string, Role> rolesDict = thisRoleAndItsRelationsList.ToDictionary(k => k.Name, r => r);
+                                Dictionary<string, Role> roleNamesOutput = new Dictionary<string, Role>(thisRoleAndItsRelationsList.Count);
+                                Role roleBeingOutput = null;
 
-                                // Role to role connector
-                                sbGraphViz.AppendFormat(" \"{0}\"->\"{1}\";", roleHierarchy.GrantedTo.Replace("\"", "\\\""), roleHierarchy.Name.Replace("\"", "\\\"")); sbGraphViz.AppendLine();
-                            }
-                            sbGraphViz.AppendLine(" // /Role hierarchy");
+                                StringBuilder sbGraphViz = new StringBuilder(64 * thisRoleAndItsRelationsHierarchiesList.Count + 128);
 
-                            #endregion
+                                // Start the graph and set its default settings
+                                sbGraphViz.AppendLine("digraph {");
+                                sbGraphViz.AppendLine(" layout=\"dot\";");
+                                sbGraphViz.AppendLine(" rankdir=\"TB\";");
+                                sbGraphViz.AppendLine(" center=true;");
+                                sbGraphViz.AppendLine(" splines=\"ortho\";");
+                                sbGraphViz.AppendLine(" overlap=false;");
+                                //sbGraphViz.AppendLine(" colorscheme=\"SVG\";");
+                                sbGraphViz.AppendLine(" node [shape=\"rect\" style=\"filled,rounded\" fontname=\"Courier New\"];");
+                                sbGraphViz.AppendLine(" edge [fontname=\"Courier New\"];");
 
-                            if (role != syntheticRoleAll)
-                            {
-                                #region Databases, Schemas, Tables and Views
+                                sbGraphViz.AppendFormat(" // Graph for the Role {0}", role); sbGraphViz.AppendLine();
 
+                                #region Role boxes
+
+                                // Role boxes
                                 sbGraphViz.AppendLine();
-                                sbGraphViz.AppendLine(" // Databases");
-                                sbGraphViz.AppendLine(" subgraph cluster_db_wrapper {");
-                                sbGraphViz.AppendLine("  label = \"Databases\";");
-                                sbGraphViz.AppendLine();
-
-                                int databaseIndex = 0;
-                                foreach (Database database in account.Databases)
+                                sbGraphViz.AppendLine(" // Roles");
+                                sbGraphViz.AppendLine  ("  subgraph cluster_roles {");
+                                sbGraphViz.AppendFormat("   label = \"roles related to: {0}\";", role); sbGraphViz.AppendLine();
+                                foreach (RoleHierarchy roleHierarchy in thisRoleAndItsRelationsHierarchiesList)
                                 {
-                                    // Should output database
-                                    bool isDatabaseRelatedToSelectedRole = false;
-                                    foreach (Grant grant in database.Grants)
+                                    if (roleHierarchy.GrantedTo != "<NOTHING>" && roleNamesOutput.ContainsKey(roleHierarchy.GrantedTo) == false)
                                     {
-                                        if (grant.Privilege == "USAGE" || grant.Privilege == "OWNERSHIP")
+                                        // Name of the role with color
+                                        rolesDict.TryGetValue(roleHierarchy.GrantedTo, out roleBeingOutput);
+                                        sbGraphViz.AppendFormat("  \"{0}\"{1};", roleHierarchy.GrantedTo.Replace("\"", "\\\""), getRoleStyleAttribute(roleBeingOutput)); sbGraphViz.AppendLine();
+                                        roleNamesOutput.Add(roleHierarchy.GrantedTo, roleBeingOutput);
+                                    }
+                                    
+                                    if (roleNamesOutput.ContainsKey(roleHierarchy.Name) == false)
+                                    {
+                                        // Name of the role with color
+                                        rolesDict.TryGetValue(roleHierarchy.Name, out roleBeingOutput);
+                                        sbGraphViz.AppendFormat("  \"{0}\"{1};", roleHierarchy.Name.Replace("\"", "\\\""), getRoleStyleAttribute(roleBeingOutput)); sbGraphViz.AppendLine();
+                                        roleNamesOutput.Add(roleHierarchy.Name, roleBeingOutput);
+                                    }
+                                }
+                                sbGraphViz.AppendLine("  }// /Roles");
+
+                                #endregion
+
+                                #region Role hierachy
+
+                                // Role connections
+                                sbGraphViz.AppendLine();
+                                sbGraphViz.AppendLine(" // Role hierarchy");
+                                foreach (RoleHierarchy roleHierarchy in thisRoleAndItsRelationsHierarchiesList)
+                                {
+                                    if (roleHierarchy.GrantedTo == "<NOTHING>") continue;
+
+                                    // Role to role connector
+                                    sbGraphViz.AppendFormat(" \"{0}\"->\"{1}\";", roleHierarchy.GrantedTo.Replace("\"", "\\\""), roleHierarchy.Name.Replace("\"", "\\\"")); sbGraphViz.AppendLine();
+                                }
+                                sbGraphViz.AppendLine(" // /Role hierarchy");
+
+                                #endregion
+
+                                if (role != syntheticRoleAll)
+                                {
+                                    #region Databases, Schemas, Tables and Views
+
+                                    sbGraphViz.AppendLine();
+                                    sbGraphViz.AppendLine(" // Databases");
+                                    sbGraphViz.AppendLine(" subgraph cluster_db_wrapper {");
+                                    sbGraphViz.AppendLine("  label = \"Databases\";");
+                                    sbGraphViz.AppendLine();
+
+                                    int databaseIndex = 0;
+                                    foreach (Database database in account.Databases)
+                                    {
+                                        // Should output database
+                                        bool isDatabaseRelatedToSelectedRole = false;
+                                        foreach (Grant grant in database.Grants)
                                         {
-                                            if (roleNamesOutput.ContainsKey(grant.GrantedTo) == true)
+                                            if (grant.Privilege == "USAGE" || grant.Privilege == "OWNERSHIP")
                                             {
-                                                isDatabaseRelatedToSelectedRole = true;
+                                                if (roleNamesOutput.ContainsKey(grant.GrantedTo) == true)
+                                                {
+                                                    isDatabaseRelatedToSelectedRole = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        if (isDatabaseRelatedToSelectedRole == false) continue;
+
+                                        // Output database
+                                        sbGraphViz.AppendFormat("  // Database {0}", database.FullName); sbGraphViz.AppendLine();
+                                        sbGraphViz.AppendFormat("  subgraph cluster_db_{0} {{", databaseIndex); sbGraphViz.AppendLine();
+                                        sbGraphViz.AppendLine  ("   style=\"filled\";");
+                                        sbGraphViz.AppendLine  ("   fillcolor=\"snow\";");
+                                        sbGraphViz.AppendFormat("   label = \"db: {0}\";", database.ShortName); sbGraphViz.AppendLine();
+                                        sbGraphViz.AppendLine  ("   node [shape=\"cylinder\" fillcolor=\"darkkhaki\"];");
+                                        sbGraphViz.AppendLine();
+
+                                        sbGraphViz.AppendFormat("   \"{0}\";", database.FullName); sbGraphViz.AppendLine();
+                                        sbGraphViz.AppendLine();
+
+                                        // List of schemas with number of tables and views
+                                        sbGraphViz.AppendFormat("   \"{0}.schema\"  [shape=\"folder\" label=<", database.FullName);  sbGraphViz.AppendLine();
+                                        sbGraphViz.AppendLine  ("    <table border=\"0\" cellborder=\"1\" bgcolor=\"white\">");
+                                        sbGraphViz.AppendLine  ("     <tr><td>S</td><td>T</td><td>V</td></tr>");
+                                        
+                                        int schemaLimit = 0;
+                                        foreach (Schema schema in database.Schemas)
+                                        {
+                                            // Only output 
+                                            if (schemaLimit >= 10) 
+                                            {
+                                                sbGraphViz.AppendFormat("     <tr><td align=\"left\">Up to {0}</td><td align=\"right\">...</td><td align=\"right\">...</td></tr>", database.Schemas.Count); sbGraphViz.AppendLine();
+
                                                 break;
                                             }
+
+                                            sbGraphViz.AppendFormat("     <tr><td align=\"left\">{0}</td><td align=\"right\">{1}</td><td align=\"right\">{2}</td></tr>", schema.ShortName, schema.Tables.Count, schema.Views.Count); sbGraphViz.AppendLine();
+
+                                            schemaLimit++;
                                         }
+                                        sbGraphViz.AppendLine  ("    </table>>];");
+
+                                        // Connect database to schemas
+                                        sbGraphViz.AppendFormat("   \"{0}\"->\"{0}.schema\" [style=\"invis\"];", database.FullName); sbGraphViz.AppendLine();
+
+                                        sbGraphViz.AppendFormat("  }} // /Database {0}", database.FullName); sbGraphViz.AppendLine();
+
+                                        databaseIndex++;
                                     }
-                                    if (isDatabaseRelatedToSelectedRole == false) continue;
 
-                                    // Output database
-                                    sbGraphViz.AppendFormat("  // Database {0}", database.FullName); sbGraphViz.AppendLine();
-                                    sbGraphViz.AppendFormat("  subgraph cluster_db_{0} {{", databaseIndex); sbGraphViz.AppendLine();
-                                    sbGraphViz.AppendLine  ("   style=\"filled\";");
-                                    sbGraphViz.AppendLine  ("   fillcolor=\"snow\";");
-                                    sbGraphViz.AppendFormat("   label = \"db: {0}\";", database.ShortName); sbGraphViz.AppendLine();
-                                    sbGraphViz.AppendLine  ("   node [shape=\"cylinder\" fillcolor=\"darkkhaki\"];");
-                                    sbGraphViz.AppendLine();
+                                    sbGraphViz.AppendLine(" } // /Databases");
 
-                                    sbGraphViz.AppendFormat("   \"{0}\";", database.FullName); sbGraphViz.AppendLine();
-                                    sbGraphViz.AppendLine();
+                                    #endregion
 
-                                    // List of schemas with number of tables and views
-                                    sbGraphViz.AppendFormat("   \"{0}.schema\"  [shape=\"folder\" label=<", database.FullName);  sbGraphViz.AppendLine();
-                                    sbGraphViz.AppendLine  ("    <table border=\"0\" cellborder=\"1\" bgcolor=\"white\">");
-                                    sbGraphViz.AppendLine  ("     <tr><td>S</td><td>T</td><td>V</td></tr>");
+                                    #region Roles using databases 
                                     
-                                    int schemaLimit = 0;
-                                    foreach (Schema schema in database.Schemas)
+                                    sbGraphViz.AppendLine();
+                                    sbGraphViz.AppendLine(" // Roles using databases");
+
+                                    // Output connectors from roles USAGE'ing databases
+                                    foreach (Database database in account.Databases)
                                     {
-                                        // Only output 
-                                        if (schemaLimit >= 10) 
+                                        foreach (Grant grant in database.Grants)
                                         {
-                                            sbGraphViz.AppendFormat("     <tr><td align=\"left\">Up to {0}</td><td align=\"right\">...</td><td align=\"right\">...</td></tr>", database.Schemas.Count); sbGraphViz.AppendLine();
-
-                                            break;
-                                        }
-
-                                        sbGraphViz.AppendFormat("     <tr><td align=\"left\">{0}</td><td align=\"right\">{1}</td><td align=\"right\">{2}</td></tr>", schema.ShortName, schema.Tables.Count, schema.Views.Count); sbGraphViz.AppendLine();
-
-                                        schemaLimit++;
-                                    }
-                                    sbGraphViz.AppendLine  ("    </table>>];");
-
-                                    // Connect database to schemas
-                                    sbGraphViz.AppendFormat("   \"{0}\"->\"{0}.schema\" [style=\"invis\"];", database.FullName); sbGraphViz.AppendLine();
-
-                                    sbGraphViz.AppendFormat("  }} // /Database {0}", database.FullName); sbGraphViz.AppendLine();
-
-                                    databaseIndex++;
-                                }
-
-                                sbGraphViz.AppendLine(" } // /Databases");
-
-                                #endregion
-
-                                #region Roles using databases 
-                                
-                                sbGraphViz.AppendLine();
-                                sbGraphViz.AppendLine(" // Roles using databases");
-
-                                // Output connectors from roles USAGE'ing databases
-                                foreach (Database database in account.Databases)
-                                {
-                                    foreach (Grant grant in database.Grants)
-                                    {
-                                        if (grant.Privilege == "USAGE" || grant.Privilege == "OWNERSHIP")
-                                        {
-                                            if (roleNamesOutput.ContainsKey(grant.GrantedTo) == true)
+                                            if (grant.Privilege == "USAGE" || grant.Privilege == "OWNERSHIP")
                                             {
-                                                sbGraphViz.AppendFormat(" \"{0}\"->\"{1}\" [color=\"darkkhaki\"];", grant.GrantedTo, grant.ObjectNameUnquoted); sbGraphViz.AppendLine();
+                                                if (roleNamesOutput.ContainsKey(grant.GrantedTo) == true)
+                                                {
+                                                    sbGraphViz.AppendFormat(" \"{0}\"->\"{1}\" [color=\"darkkhaki\"];", grant.GrantedTo, grant.ObjectNameUnquoted); sbGraphViz.AppendLine();
+                                                }
                                             }
                                         }
                                     }
+
+                                    sbGraphViz.AppendLine(" // /Roles using databases");
+
+                                    #endregion
                                 }
 
-                                sbGraphViz.AppendLine(" // /Roles using databases");
+                                #region Legend
 
+                                // Output Legend
+                                sbGraphViz.AppendLine();
+                                string legend = @" // Legend
+    ""legend"" [label=<
+    <table border=""0"" cellborder=""0"" bgcolor=""white"">
+    <tr><td align=""center"">Legend</td></tr>
+    <tr><td align=""left"" bgcolor=""lightgray"">BUILT IN</td></tr>
+    <tr><td align=""left"" bgcolor=""beige"">SCIM</td></tr>
+    <tr><td align=""left"" bgcolor=""wheat"">ROLE MANAGEMENT</td></tr>
+    <tr><td align=""left"" bgcolor=""orchid"">FUNCTIONAL</td></tr>
+    <tr><td align=""left"" bgcolor=""plum"">FUNCTIONAL NOT UNDER SYSADMIN</td></tr>
+    <tr><td align=""left"" bgcolor=""lightblue"">ACCESS</td></tr>
+    <tr><td align=""left"" bgcolor=""azure"">ACCESS NOT UNDER SYSADMIN</td></tr>
+    <tr><td align=""left"" bgcolor=""orange"">NOT UNDER ACCOUNTADMIN</td></tr>
+    </table>>];";
+                                sbGraphViz.AppendLine(legend);
+                                
                                 #endregion
+
+                                // Close the graph
+                                sbGraphViz.AppendLine("}");
+        
+                                FileIOHelper.SaveFileToPath(sbGraphViz.ToString(), FilePathMap.Report_GraphViz_RoleAndItsRelationsGrants_FilePath(role.Name), false);
                             }
 
-                            #region Legend
-
-                            // Output Legend
-                            sbGraphViz.AppendLine();
-                            string legend = @" // Legend
-  ""legend"" [label=<
-  <table border=""0"" cellborder=""0"" bgcolor=""white"">
-  <tr><td align=""center"">Legend</td></tr>
-  <tr><td align=""left"" bgcolor=""lightgray"">BUILT IN</td></tr>
-  <tr><td align=""left"" bgcolor=""beige"">SCIM</td></tr>
-  <tr><td align=""left"" bgcolor=""wheat"">ROLE MANAGEMENT</td></tr>
-  <tr><td align=""left"" bgcolor=""orchid"">FUNCTIONAL</td></tr>
-  <tr><td align=""left"" bgcolor=""plum"">FUNCTIONAL NOT UNDER SYSADMIN</td></tr>
-  <tr><td align=""left"" bgcolor=""lightblue"">ACCESS</td></tr>
-  <tr><td align=""left"" bgcolor=""azure"">ACCESS NOT UNDER SYSADMIN</td></tr>
-  <tr><td align=""left"" bgcolor=""orange"">NOT UNDER ACCOUNTADMIN</td></tr>
-  </table>>];";
-                            sbGraphViz.AppendLine(legend);
-                            
-                            #endregion
-
-                            // Close the graph
-                            sbGraphViz.AppendLine("}");
-    
-                            FileIOHelper.SaveFileToPath(sbGraphViz.ToString(), FilePathMap.Report_GraphViz_RoleAndItsRelationsGrants_FilePath(role.Name), false);
+                            return 1;
+                        },
+                        (finalResult) =>
+                        {
+                            Interlocked.Add(ref j, finalResult);
+                            if (j % 50 == 0)
+                            {
+                                Console.Write("[{0}].", j);
+                            }
                         }
-                    }
+                    );
+                    loggerConsole.Info("Completed {0} Roles", rolesList.Count);
 
                     #endregion
 
@@ -379,25 +404,44 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
                     if (graphVizDriver.ExecutableFilePath.Length > 0)
                     {
-                        foreach (Role role in rolesList)
-                        {
-                            graphVizDriver.ConvertGraphVizToFile(
-                                FilePathMap.Report_GraphViz_RoleAndItsRelationsGrants_FilePath(role.Name),
-                                FilePathMap.Report_Diagram_SVG_RoleAndItsRelationsGrants_FilePath(role.Name, true), 
-                                "svg");
-                            graphVizDriver.ConvertGraphVizToFile(
-                                FilePathMap.Report_GraphViz_RoleAndItsRelationsGrants_FilePath(role.Name),
-                                FilePathMap.Report_Diagram_PNG_RoleAndItsRelationsGrants_FilePath(role.Name, true), 
-                                "png");
-                            graphVizDriver.ConvertGraphVizToFile(
-                                FilePathMap.Report_GraphViz_RoleAndItsRelationsGrants_FilePath(role.Name),
-                                FilePathMap.Report_Diagram_PDF_RoleAndItsRelationsGrants_FilePath(role.Name, true), 
-                                "pdf");
-                        }
+                        j = 0;
+
+                        Parallel.ForEach<Role, int>(
+                            rolesList,
+                            parallelOptions,
+                            () => 0,
+                            (role, loop, subtotal) =>
+                            {
+                                loggerConsole.Info("Rendering graphs for {0}", role);  
+
+                                graphVizDriver.ConvertGraphVizToFile(
+                                    FilePathMap.Report_GraphViz_RoleAndItsRelationsGrants_FilePath(role.Name),
+                                    FilePathMap.Report_Diagram_SVG_RoleAndItsRelationsGrants_FilePath(role.Name, true), 
+                                    "svg");
+                                graphVizDriver.ConvertGraphVizToFile(
+                                    FilePathMap.Report_GraphViz_RoleAndItsRelationsGrants_FilePath(role.Name),
+                                    FilePathMap.Report_Diagram_PNG_RoleAndItsRelationsGrants_FilePath(role.Name, true), 
+                                    "png");
+                                graphVizDriver.ConvertGraphVizToFile(
+                                    FilePathMap.Report_GraphViz_RoleAndItsRelationsGrants_FilePath(role.Name),
+                                    FilePathMap.Report_Diagram_PDF_RoleAndItsRelationsGrants_FilePath(role.Name, true), 
+                                    "pdf");                                
+
+                                return 1;
+                            },
+                            (finalResult) =>
+                            {
+                                Interlocked.Add(ref j, finalResult);
+                                if (j % 10 == 0)
+                                {
+                                    Console.Write("[{0}].", j);
+                                }
+                            }
+                        );
+                        loggerConsole.Info("Completed {0} Roles", rolesList.Count);
                     }
 
                     #endregion
-
                 }
                 
                 return true;
