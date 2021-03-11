@@ -175,7 +175,6 @@ For example, this command uses named connection `mysnowflakeaccount` and creates
 ./SFGrantReport -c mysnowflakeaccount -o ~/Documents/MyAwesomeReport
 or
 ./SFGrantReport --connection mysnowflakeaccount --output-folder ~/Documents/MyAwesomeReport
-
 ```
 
 Relative paths are supported, like here to go from current folder up two levels:
@@ -216,4 +215,4 @@ d----            2/2/2021  5:08 PM                RPT
 -a---            2/2/2021  5:08 PM           9816 SFGrantReport.WAREHOUSE.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
 ```
 
-For more information, see [Documentation](wiki/Home).
+For more information, see [Documentation](../../wiki/Home).
