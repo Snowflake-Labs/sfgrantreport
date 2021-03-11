@@ -1,3 +1,18 @@
+// Copyright (c) 2021 Snowflake Inc. All rights reserved.
+
+// Licensed under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+
+//   http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 using System;
 using System.IO;
 
@@ -311,11 +326,11 @@ namespace Snowflake.GrantReport.ProcessingSteps
         {
             if (this.ProgramOptions.ReportJob.Connection != null && this.ProgramOptions.ReportJob.Connection.Length > 0)
             {
-                return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("UsersRolesGrants.ALL.{0}.{1:yyyyMMddHHmm}.xlsx", this.ProgramOptions.ReportJob.Connection, this.ProgramOptions.ReportJob.DataRetrievedOnUtc));
+                return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("SFGrantReport.ALL.{0}.{1:yyyyMMddHHmm}.xlsx", this.ProgramOptions.ReportJob.Connection, this.ProgramOptions.ReportJob.DataRetrievedOnUtc));
             }
             else
             {
-                return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("UsersRolesGrants.ALL.{0}.{1:yyyyMMddHHmm}.xlsx", new DirectoryInfo(this.ProgramOptions.InputFolderPath).Name, this.ProgramOptions.ReportJob.DataRetrievedOnUtc));
+                return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("SFGrantReport.ALL.{0}.{1:yyyyMMddHHmm}.xlsx", new DirectoryInfo(this.ProgramOptions.InputFolderPath).Name, this.ProgramOptions.ReportJob.DataRetrievedOnUtc));
             }
         }
 
@@ -323,11 +338,11 @@ namespace Snowflake.GrantReport.ProcessingSteps
         {
             if (this.ProgramOptions.ReportJob.Connection != null && this.ProgramOptions.ReportJob.Connection.Length > 0)
             {
-                return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("UsersRolesGrants.{0}.{1}.{2:yyyyMMddHHmm}.xlsx", sheetSetName, this.ProgramOptions.ReportJob.Connection, this.ProgramOptions.ReportJob.DataRetrievedOnUtc));
+                return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("SFGrantReport.{0}.{1}.{2:yyyyMMddHHmm}.xlsx", sheetSetName, this.ProgramOptions.ReportJob.Connection, this.ProgramOptions.ReportJob.DataRetrievedOnUtc));
             }
             else
             {
-                return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("UsersRolesGrants.{0}.{1}.{2:yyyyMMddHHmm}.xlsx", sheetSetName, new DirectoryInfo(this.ProgramOptions.InputFolderPath).Name, this.ProgramOptions.ReportJob.DataRetrievedOnUtc));
+                return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("SFGrantReport.{0}.{1}.{2:yyyyMMddHHmm}.xlsx", sheetSetName, new DirectoryInfo(this.ProgramOptions.InputFolderPath).Name, this.ProgramOptions.ReportJob.DataRetrievedOnUtc));
             }
         }
 
@@ -375,7 +390,7 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
         public string UsersRolesAndGrantsWebReportFilePath()
         {
-            return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("UsersRolesGrants.{0}.{1:yyyyMMddHHmm}.html", this.ProgramOptions.ReportJob.Connection, this.ProgramOptions.ReportJob.DataRetrievedOnUtc));
+            return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("SFGrantReport.{0}.{1:yyyyMMddHHmm}.html", this.ProgramOptions.ReportJob.Connection, this.ProgramOptions.ReportJob.DataRetrievedOnUtc));
         }
 
         #endregion

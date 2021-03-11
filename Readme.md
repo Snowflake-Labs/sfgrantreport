@@ -1,23 +1,43 @@
 # Snowflake Grant Report
+Snowflake Role-based Access Control (RBAC) offers customers powerful tools to configure authorization to secure their systems, including ability to build a hierarchy of roles and assign mix of granular permissions for combined effective permissions. For more information, see [Overview of Access Control](https://docs.snowflake.com/en/user-guide/security-access-control-overview.html).
+
 Snowflake Grant Report extracts Roles and Grants data from Snowflake and provides tabular and visual reports on the Role hierarchy and Grant assignments.
 
+## Visualizing Role Hierarchy
+Visual representation of Role hierarchy and databases used by those Roles, with Roles color-coded to their type and location within the hierarchy, offering online graph visualization as well PNG, SVG and PDF versions.
+![](/docs/Hierarchy/ExampleRoleHierarchy.png?raw=true)
+
+For more information, see [Role Hiearchy Reports](wiki/Role-Hierarchy-Reports).
+
+## Tabular Report
+All Grants for the TABLE Object Type:
+![](docs/Grants/Grants.Tbl.TABLE.png?raw=true)
+
+All Grants granted to specific Roles, filtered by Object Type, showing distinct Privileges on those Objects
+![](docs/Grants/Grants.Type.Privilege.png?raw=true)
+
+all Roles created over years and months by different Owner Roles:
+![](docs/Roles/Roles.CreatedTimeline.png?raw=true)
+
+For more information, see [Table Reports](wiki/Table-Reports).
+
 # Install Prerequisites
-## SnowSQL
-To access data in Snowflake, you need to install SnowSQL on your system as described in https://docs.snowflake.com/en/user-guide/snowsql-install-config.html.
+## Install SnowSQL
+To access data in Snowflake, you need to install SnowSQL on your system as described in [Installing SnowSQL](https://docs.snowflake.com/en/user-guide/snowsql-install-config.html).
 
-Configure named connection parameter as described in https://docs.snowflake.com/en/user-guide/snowsql-start.html#using-named-connections. Any authentication option you choose is supported.
+Configure named connection parameter as described in [Using Named Connections](https://docs.snowflake.com/en/user-guide/snowsql-start.html#using-named-connections). All authentication option are supported.
 
-Ensure SnowSQL is in the PATH of your shell. You can test by running `snowsql` executable in your shell:
+Ensure `snowsql` is in the PATH of your shell. Test by running this in your shell:
 ```
 snowsql -v
 ```
-You should see `snowsql` executable output something similar to this:
+You should see output similar to this:
 ```
 Version: 1.2.12
 ```
 
-## GraphViz
-To produce role and grant relationship visualization files locally (SVG, PNG, PDF), install GraphViz tools from https://graphviz.org/download. 
+## Install GraphViz
+To produce Role and Database Object relationship visualization files locally (SVG, PNG, PDF) that you need to install GraphViz tools from https://graphviz.org/download. 
 
 OS | Notes
 --|--
@@ -34,48 +54,51 @@ You should see something like that:
 dot - graphviz version 2.46.0 (20210118.1747)
 ```
 
-# Install SnowGrantReport
-## OSX
-Download `SnowGrantReport.osx.<version>.zip` but do not extract the archive yet.
+# Install Application
+Snowflake Grant Report can run on Windows, Mac or most Linux distributions.
+
+## Install on OSX
+Download `SFGrantReport.osx.<version>.zip` but do not extract the archive yet.
 
 Open terminal/shell of your choice and change working directory to where you saved the file to. 
 
 Run this command in the shell to remove the quarantine attribute that will otherwise stop the application from running:
 ```
-xattr -d com.apple.quarantine SnowGrantReport.*.zip
+xattr -d com.apple.quarantine SFGrantReport.*.zip
 ```
 
 Now extract the archive.
 
-## Windows
-Download `SnowGrantReport.win.<version>.zip`, save and extract the archive.
+## Install on Windows
+Download `SFGrantReport.win.<version>.zip`, save and extract the archive.
 
-## Linux
-Download `SnowGrantReport.linux.<version>.zip` and extract the archive
+## Install on Linux
+Download `SFGrantReport.linux.<version>.zip` and extract the archive
 
 Run these commands to mark the file as executable:
 ```
-cd SnowflakeGrantReport.linux.<version>
-chmod +x SnowGrantReport
+cd SFGrantReport.linux.<version>
+chmod +x SFGrantReport
 ```
 
-# Validate SnowGrantReport is Installed
-Validate that SnowGrantReport is working by running this command in the shell:
+# Run Application
+## Parameters
+Get list of Snowflake Grant Report parameters by running this command in your shell:
 
 OSX or Linux:
 ```
-./SnowGrantReport --help
+./SFGrantReport --help
 ```
 
 Windows:
 ```
-.\SnowGrantReport.exe --help
+.\SFGrantReport.exe --help
 ```
 
 You should see something like that:
 ```
 Snowflake Grant Report Version 2021.2.12.0
-SnowGrantReport 2021.2.12.0
+SFGrantReport 2021.2.12.0
 Copyright c 2020-2021
 
 ERROR(S):
@@ -95,9 +118,8 @@ ERROR(S):
   --version                              Display version information.
 ```
 
-# Run SnowGrantReport
 ## -c/--connection
-SnowGrantReport can connect to Snowflake directly to retrieve Role and Grant information. 
+SFGrantReport can connect to Snowflake directly to retrieve Role and Grant information. 
 
 Use `-c/--connection` parameter to specify the name of the connection in snowsql configuration file. 
 
@@ -108,16 +130,16 @@ For example, `mysnowflakeaccount` is a named connection configured in the follow
 accountname = mysnowflakeaccount
 username = myusername
 password = ************
-warehousename = MY_WH
-dbname = MY_DB
+warehousename = MY_WAREHOUSE
+dbname = MY_DATABASE
 ```
 
-The user must possess SECURITYADMIN role. 
+For full results, the user must have SECURITYADMIN role to to Roles and Users. If user has is a SYSADMIN or below, DESCRIBE USER command is unlikely to return all the data, but grant hierarchy should work.
 
 ## -i, --input-folder
-It is also possible to run SnowGrantReport in offline mode, without connecting to Snowflake directly. 
+It is also possible to run SFGrantReport in offline mode, without connecting to Snowflake directly. 
 
-Use '-i, --input-folder' parameter to specify the path to the folder containing exports from SNOWFLAKE.ACCOUNT_USAGE views GRANTS_TO_ROLES (https://docs.snowflake.com/en/sql-reference/account-usage/grants_to_roles.html) and GRANTS_TO_USERS (https://docs.snowflake.com/en/sql-reference/account-usage/grants_to_users.html). 
+Use '-i, --input-folder' parameter to specify the path to the folder containing exports from [SNOWFLAKE.ACCOUNT_USAGE](https://docs.snowflake.com/en/sql-reference/account-usage.html) share, and specifically from [GRANTS_TO_ROLES](https://docs.snowflake.com/en/sql-reference/account-usage/grants_to_roles.html) and [GRANTS_TO_USERS](https://docs.snowflake.com/en/sql-reference/account-usage/grants_to_users.html) views. 
 
 The `SELECT * FROM SNOWFLAKE.ACCOUNT_USAGE.GRANTS_TO_ROLES` query output must be ran as ACCOUNTADMIN and must be saved as `GRANTS_TO_ROLES.csv`: 
 ```
@@ -140,9 +162,9 @@ snowsql -c mysnowflakeaccount -r ACCOUNTADMIN -q "SELECT * FROM SNOWFLAKE.ACCOUN
 
 With those files exported saved, you can invoke the command to process them offline:
 ```
-./SnowGrantReport -i path/to/account_usage -o ~/Documents/MyAwesomeOfflineReport
+./SFGrantReport -i path/to/account_usage -o ~/Documents/MyAwesomeOfflineReport
 or
-./SnowGrantReport --input-folder path/to/account_usage --output-folder ~/Documents/MyAwesomeOfflineReport
+./SFGrantReport --input-folder path/to/account_usage --output-folder ~/Documents/MyAwesomeOfflineReport
 ```
 
 ## -o/--output-folder
@@ -150,22 +172,22 @@ Use `-o/--output-folder` parameter to specify where the report files should go (
 
 For example, this command uses named connection `mysnowflakeaccount` and creates report in the folder named `MyAwesomeReport` in the Documents folder:
 ```
-./SnowGrantReport -c mysnowflakeaccount -o ~/Documents/MyAwesomeReport
+./SFGrantReport -c mysnowflakeaccount -o ~/Documents/MyAwesomeReport
 or
-./SnowGrantReport --connection mysnowflakeaccount --output-folder ~/Documents/MyAwesomeReport
+./SFGrantReport --connection mysnowflakeaccount --output-folder ~/Documents/MyAwesomeReport
 
 ```
 
 Relative paths are supported, like here to go from current folder up two levels:
 ```
-./SnowGrantReport --connection mysnowflakeaccount --output-folder ../../MyAwesomeReport
+./SFGrantReport --connection mysnowflakeaccount --output-folder ../../MyAwesomeReport
 ```
 
 ## -d, --delete-previous-report-output
 If the output folder already contains some data, when `-d, --delete-previous-report-output` is specified, the output folder is cleared.
 
 # Find Results
-Results are in various `UsersRolesGrants.<prefix><connectionname>.<timestamp of report generation>.xlsx` documents as well as in the Output folder\RPT (in various CSV/PNG/SVG/PDF files):
+Results are in various `SFGrantReport.<prefix>.<connectionname>.<timestamp of report generation>.xlsx` documents as well as in the Output folder\RPT (in various CSV/PNG/SVG/PDF files):
 
 ```
     Directory: C:\snowflake\GrantReport\Reports\myreport
@@ -193,3 +215,5 @@ d----            2/2/2021  5:08 PM                RPT
 -a---            2/2/2021  5:08 PM          13331 UsersRolesGrants.VIEW.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
 -a---            2/2/2021  5:08 PM           9816 UsersRolesGrants.WAREHOUSE.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
 ```
+
+For more information, see [Documentation](wiki/Home).
