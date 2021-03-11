@@ -7,7 +7,7 @@ Snowflake Grant Report extracts Roles and Grants data from Snowflake and provide
 Visual representation of Role hierarchy and databases used by those Roles, with Roles color-coded to their type and location within the hierarchy, offering online graph visualization as well PNG, SVG and PDF versions.
 ![](/docs/Hierarchy/ExampleRoleHierarchy.png?raw=true)
 
-For more information, see [Role Hiearchy Reports](/wiki/Role-Hierarchy-Reports).
+For more information, see [Role Hiearchy Reports](../../wiki/Role-Hierarchy-Reports).
 
 ## Tabular Report
 All Grants for the TABLE Object Type:
@@ -19,7 +19,7 @@ All Grants granted to specific Roles, filtered by Object Type, showing distinct 
 all Roles created over years and months by different Owner Roles:
 ![](docs/Roles/Roles.CreatedTimeline.png?raw=true)
 
-For more information, see [Table Reports](/wiki/Table-Reports).
+For more information, see [Table Reports](../../wiki/Table-Reports).
 
 # Install Prerequisites
 ## Install SnowSQL
