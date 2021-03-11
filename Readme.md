@@ -73,16 +73,10 @@ Now extract the archive.
 Download `SFGrantReport.win.<version>.zip`, save and extract the archive.
 
 ## Install on Linux
-Download `SFGrantReport.linux.<version>.zip` and extract the archive
-
-Run these commands to mark the file as executable:
-```
-cd SFGrantReport.linux.<version>
-chmod +x SFGrantReport
-```
+Download `SFGrantReport.linux.<version>.zip`, save and extract the archive.
 
 # Run Application
-## Parameters
+## Available Command Line Parameters
 Get list of Snowflake Grant Report parameters by running this command in your shell:
 
 OSX or Linux:
@@ -216,3 +210,12 @@ d----            2/2/2021  5:08 PM                RPT
 ```
 
 For more information, see [Documentation](../../wiki/Home).
+
+# Acknowledgements
+* Microsoft - Thanks for Visual Studio and .NET Core team for letting us all run CLR code on any platform https://github.com/dotnet/core
+* Command Line Parser - Simple and fast https://github.com/commandlineparser/commandline
+* CSV File Creation and Parsing - An excellent utility https://github.com/JoshClose/CsvHelper
+* JSON Parsing - NewtonSoft JSON is awesome https://www.newtonsoft.com/json
+* Logging - NLog is also awesome http://nlog-project.org/ 
+* Excel Report Creation - Jan Kallman's excellent helper class is a lifesaver https://github.com/EPPlusSoftware/EPPlus
+* GraphViz - Incredibly powerful cross platform visualization https://graphviz.org
