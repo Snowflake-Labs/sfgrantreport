@@ -183,7 +183,7 @@ Relative paths are supported, like here to go from current folder up two levels:
 ## -d, --delete-previous-report-output
 If the output folder already contains some data, when `-d, --delete-previous-report-output` is specified, the output folder is cleared.
 
-# Find Results
+# Report Results
 Results are in various `SFGrantReport.<prefix>.<connectionname>.<timestamp of report generation>.xlsx` documents as well as in the Output folder\RPT (in various CSV/PNG/SVG/PDF files):
 
 ```
