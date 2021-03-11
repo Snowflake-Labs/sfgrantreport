@@ -16,8 +16,12 @@ All Grants for the TABLE Object Type:
 All Grants granted to specific Roles, filtered by Object Type, showing distinct Privileges on those Objects
 ![](docs/Grants/Grants.Type.Privilege.png?raw=true)
 
-all Roles created over years and months by different Owner Roles:
+All Roles created over years and months by different Owner Roles:
 ![](docs/Roles/Roles.CreatedTimeline.png?raw=true)
+
+Showing all Grants for Schema, Table and View object in a Database:
+
+![](docs/Grants/DB.EXAMPLE.png?raw=true)
 
 For more information, see [Table Reports](../../wiki/Table-Reports).
 
