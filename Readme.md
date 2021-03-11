@@ -7,7 +7,7 @@ Snowflake Grant Report extracts Roles and Grants data from Snowflake and provide
 Visual representation of Role hierarchy and databases used by those Roles, with Roles color-coded to their type and location within the hierarchy, offering online graph visualization as well PNG, SVG and PDF versions.
 ![](/docs/Hierarchy/ExampleRoleHierarchy.png?raw=true)
 
-For more information, see [Role Hiearchy Reports](wiki/Role-Hierarchy-Reports).
+For more information, see [Role Hiearchy Reports](/wiki/Role-Hierarchy-Reports).
 
 ## Tabular Report
 All Grants for the TABLE Object Type:
@@ -19,7 +19,7 @@ All Grants granted to specific Roles, filtered by Object Type, showing distinct 
 all Roles created over years and months by different Owner Roles:
 ![](docs/Roles/Roles.CreatedTimeline.png?raw=true)
 
-For more information, see [Table Reports](wiki/Table-Reports).
+For more information, see [Table Reports](/wiki/Table-Reports).
 
 # Install Prerequisites
 ## Install SnowSQL
@@ -198,22 +198,22 @@ d----            2/2/2021  5:08 PM                DATA
 d----            2/2/2021  5:08 PM                RPT
 -a---            2/2/2021  5:08 PM            224 Snowflake.GrantReport.json
 -a---            2/2/2021  5:08 PM           1472 StepDurations.csv
--a---            2/2/2021  5:08 PM          11601 UsersRolesGrants.ACCOUNT.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
--a---            2/2/2021  5:08 PM         180197 UsersRolesGrants.ALL.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
--a---            2/2/2021  5:08 PM          11089 UsersRolesGrants.DATABASE.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
--a---            2/2/2021  5:08 PM          24313 UsersRolesGrants.DBGRANTS.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
--a---            2/2/2021  5:08 PM          37701 UsersRolesGrants.Grants.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
--a---            2/2/2021  5:08 PM           9579 UsersRolesGrants.INTEGRATION.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
--a---            2/2/2021  5:08 PM           9301 UsersRolesGrants.NOTIFICATION_SUBSCRIPTION.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
--a---            2/2/2021  5:08 PM          17246 UsersRolesGrants.ROLE.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
--a---            2/2/2021  5:08 PM          16730 UsersRolesGrants.SCHEMA.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
--a---            2/2/2021  5:08 PM        1333324 UsersRolesGrants.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.html
--a---            2/2/2021  5:08 PM           9309 UsersRolesGrants.STAGE.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
--a---            2/2/2021  5:08 PM          12093 UsersRolesGrants.TABLE.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
--a---            2/2/2021  5:08 PM          12033 UsersRolesGrants.USER.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
--a---            2/2/2021  5:08 PM          66038 UsersRolesGrants.UsersRoles.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
--a---            2/2/2021  5:08 PM          13331 UsersRolesGrants.VIEW.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
--a---            2/2/2021  5:08 PM           9816 UsersRolesGrants.WAREHOUSE.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
+-a---            2/2/2021  5:08 PM          11601 SFGrantReport.ACCOUNT.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
+-a---            2/2/2021  5:08 PM         180197 SFGrantReport.ALL.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
+-a---            2/2/2021  5:08 PM          11089 SFGrantReport.DATABASE.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
+-a---            2/2/2021  5:08 PM          24313 SFGrantReport.DBGRANTS.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
+-a---            2/2/2021  5:08 PM          37701 SFGrantReport.Grants.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
+-a---            2/2/2021  5:08 PM           9579 SFGrantReport.INTEGRATION.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
+-a---            2/2/2021  5:08 PM           9301 SFGrantReport.NOTIFICATION_SUBSCRIPTION.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
+-a---            2/2/2021  5:08 PM          17246 SFGrantReport.ROLE.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
+-a---            2/2/2021  5:08 PM          16730 SFGrantReport.SCHEMA.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
+-a---            2/2/2021  5:08 PM        1333324 SFGrantReport.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.html
+-a---            2/2/2021  5:08 PM           9309 SFGrantReport.STAGE.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
+-a---            2/2/2021  5:08 PM          12093 SFGrantReport.TABLE.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
+-a---            2/2/2021  5:08 PM          12033 SFGrantReport.USER.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
+-a---            2/2/2021  5:08 PM          66038 SFGrantReport.UsersRoles.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
+-a---            2/2/2021  5:08 PM          13331 SFGrantReport.VIEW.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
+-a---            2/2/2021  5:08 PM           9816 SFGrantReport.WAREHOUSE.sfpscogs_dodievich_sso.west-us-2.azure.202102030106.xlsx
 ```
 
 For more information, see [Documentation](wiki/Home).
