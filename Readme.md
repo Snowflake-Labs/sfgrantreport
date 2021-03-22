@@ -59,7 +59,7 @@ dot - graphviz version 2.46.0 (20210118.1747)
 ```
 
 # Install Application
-Snowflake Grant Report can run on Windows, Mac or most Linux distributions. It is available from [Releases](releases/latest)
+Snowflake Grant Report can run on Windows, Mac or most Linux distributions. It is available from [Releases](https://github.com/Snowflake-Labs/sfgrantreport/releases/latest)
 
 ## Install on OSX
 Download `SFGrantReport.osx.<version>.zip` but do not extract the archive yet.
