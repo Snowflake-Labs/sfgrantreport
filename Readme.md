@@ -64,7 +64,7 @@ Snowflake Grant Report can run on Windows, Mac or most Linux distributions.
 Files are in [Releases](https://github.com/Snowflake-Labs/sfgrantreport/releases/latest).
 
 ## Install on OSX
-Download [Releases](https://github.com/Snowflake-Labs/sfgrantreport/releases/latest)\`SFGrantReport.osx.<version>.zip` but do not extract the archive yet.
+Download [Releases](https://github.com/Snowflake-Labs/sfgrantreport/releases/latest)\ `SFGrantReport.osx.<version>.zip` but do not extract the archive yet.
 
 Open terminal/shell of your choice and change working directory to where you saved the file to. 
 
