@@ -76,10 +76,10 @@ xattr -d com.apple.quarantine SFGrantReport.*.zip
 Now extract the archive.
 
 ## Install on Windows
-Download [Releases](https://github.com/Snowflake-Labs/sfgrantreport/releases/latest)\`SFGrantReport.win.<version>.zip`, save and extract the archive.
+Download [Releases](https://github.com/Snowflake-Labs/sfgrantreport/releases/latest)\ `SFGrantReport.win.<version>.zip`, save and extract the archive.
 
 ## Install on Linux
-Download [Releases](https://github.com/Snowflake-Labs/sfgrantreport/releases/latest)\`SFGrantReport.linux.<version>.zip`, save and extract the archive.
+Download [Releases](https://github.com/Snowflake-Labs/sfgrantreport/releases/latest)\ `SFGrantReport.linux.<version>.zip`, save and extract the archive.
 
 # Run Application
 ## Available Command Line Parameters
