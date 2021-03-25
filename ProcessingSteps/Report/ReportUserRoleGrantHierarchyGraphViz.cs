@@ -268,12 +268,13 @@ namespace Snowflake.GrantReport.ProcessingSteps
     <tr><td align=""center"">Legend</td></tr>
     <tr><td align=""left"" bgcolor=""lightgray"">BUILT IN</td></tr>
     <tr><td align=""left"" bgcolor=""beige"">SCIM</td></tr>
-    <tr><td align=""left"" bgcolor=""wheat"">ROLE MANAGEMENT</td></tr>
+    <tr><td align=""left"" bgcolor=""palegreen"">ROLE MANAGEMENT</td></tr>
     <tr><td align=""left"" bgcolor=""orchid"">FUNCTIONAL</td></tr>
-    <tr><td align=""left"" bgcolor=""plum"">FUNCTIONAL NOT UNDER SYSADMIN</td></tr>
+    <tr><td align=""left"" bgcolor=""plum"">FUNCTIONAL, NOT UNDER SYSADMIN</td></tr>
     <tr><td align=""left"" bgcolor=""lightblue"">ACCESS</td></tr>
-    <tr><td align=""left"" bgcolor=""azure"">ACCESS NOT UNDER SYSADMIN</td></tr>
-    <tr><td align=""left"" bgcolor=""orange"">NOT UNDER ACCOUNTADMIN</td></tr>
+    <tr><td align=""left"" bgcolor=""azure"">ACCESS, NOT UNDER SYSADMIN</td></tr>
+    <tr><td align=""left"" bgcolor=""navajowhite"">UNKNOWN</td></tr>
+    <tr><td align=""left"" bgcolor=""orange"">UNKNOWN, NOT UNDER ACCOUNTADMIN</td></tr>
     </table>>];";
                                 sbGraphViz.AppendLine(legend);
                                 
@@ -496,8 +497,6 @@ namespace Snowflake.GrantReport.ProcessingSteps
             // Color names being used here https://graphviz.org/doc/info/colors.html
             switch (role.Type)
             {
-                case RoleType.Unknown:
-                    break;
                 case RoleType.BuiltIn:
                     styleAttribute = " [fillcolor=\"lightgray\"]";
                     break;
@@ -505,7 +504,7 @@ namespace Snowflake.GrantReport.ProcessingSteps
                     styleAttribute = " [fillcolor=\"beige\"]";
                     break;
                 case RoleType.RoleManagement:
-                    styleAttribute = " [fillcolor=\"wheat\"]";
+                    styleAttribute = " [fillcolor=\"palegreen\"]";
                     break;
                 case RoleType.Functional:
                     styleAttribute = " [fillcolor=\"orchid\"]";
@@ -519,7 +518,10 @@ namespace Snowflake.GrantReport.ProcessingSteps
                 case RoleType.AccessNotUnderSysadmin:
                     styleAttribute = " [fillcolor=\"azure\"]";
                     break;
-                case RoleType.NotUnderAccountAdmin:
+                case RoleType.Unknown:
+                    styleAttribute = " [fillcolor=\"navajowhite\"]";
+                    break;
+                case RoleType.UnknownNotUnderAccountAdmin:
                     styleAttribute = " [fillcolor=\"orange\"]";
                     break;
                 default:

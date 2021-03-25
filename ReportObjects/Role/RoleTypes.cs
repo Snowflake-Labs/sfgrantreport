@@ -42,6 +42,6 @@ namespace Snowflake.GrantReport.ReportObjects
         AccessNotUnderSysadmin,
 
         // Not under ACCOUNTADMIN
-        NotUnderAccountAdmin
+        UnknownNotUnderAccountAdmin
     }
 }
