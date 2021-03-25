@@ -125,25 +125,40 @@ namespace Snowflake.GrantReport.ProcessingSteps
                     Dictionary<string, List<Grant>> grantsToViewDict = new Dictionary<string, List<Grant>>();
                     Dictionary<string, List<Grant>> grantsToRoleDict = new Dictionary<string, List<Grant>>();
 
-                    var grantsToSchemaGroups = grantsToSchemaAllList.GroupBy(g => g.GrantedTo);
-                    foreach (var grantsGroup in grantsToSchemaGroups)
+                    if (grantsToSchemaAllList != null) 
                     {
-                        grantsToSchemaDict.Add(grantsGroup.Key, grantsGroup.ToList());
+                        var grantsToSchemaGroups = grantsToSchemaAllList.GroupBy(g => g.GrantedTo);
+                        foreach (var grantsGroup in grantsToSchemaGroups)
+                        {
+                            grantsToSchemaDict.Add(grantsGroup.Key, grantsGroup.ToList());
+                        }
                     }
-                    var grantsToTableGroups = grantsToTableAllList.GroupBy(g => g.GrantedTo);
-                    foreach (var grantsGroup in grantsToTableGroups)
+
+                    if (grantsToTableAllList != null) 
                     {
-                        grantsToTableDict.Add(grantsGroup.Key, grantsGroup.ToList());
+                        var grantsToTableGroups = grantsToTableAllList.GroupBy(g => g.GrantedTo);
+                        foreach (var grantsGroup in grantsToTableGroups)
+                        {
+                            grantsToTableDict.Add(grantsGroup.Key, grantsGroup.ToList());
+                        }
                     }
-                    var grantsToViewGroups = grantsToViewAllList.GroupBy(g => g.GrantedTo);
-                    foreach (var grantsGroup in grantsToViewGroups)
+
+                    if (grantsToViewAllList != null) 
                     {
-                        grantsToViewDict.Add(grantsGroup.Key, grantsGroup.ToList());
+                        var grantsToViewGroups = grantsToViewAllList.GroupBy(g => g.GrantedTo);
+                        foreach (var grantsGroup in grantsToViewGroups)
+                        {
+                            grantsToViewDict.Add(grantsGroup.Key, grantsGroup.ToList());
+                        }
                     }
-                    var grantsToRoleGroups = grantsToRoleAllList.GroupBy(g => g.GrantedTo);
-                    foreach (var grantsGroup in grantsToRoleGroups)
+
+                    if (grantsToRoleAllList != null) 
                     {
-                        grantsToRoleDict.Add(grantsGroup.Key, grantsGroup.ToList());
+                        var grantsToRoleGroups = grantsToRoleAllList.GroupBy(g => g.GrantedTo);
+                        foreach (var grantsGroup in grantsToRoleGroups)
+                        {
+                            grantsToRoleDict.Add(grantsGroup.Key, grantsGroup.ToList());
+                        }
                     }
 
                     j = 0;
@@ -248,7 +263,7 @@ namespace Snowflake.GrantReport.ProcessingSteps
                                 if (role.Type == RoleType.Unknown && role.RollsUpTo(roleACCOUNTADMIN) == false)
                                 {
                                     // This role is not connected to the proper hierarchy
-                                    role.Type = RoleType.NotUnderAccountAdmin;
+                                    role.Type = RoleType.UnknownNotUnderAccountAdmin;
                                 }
 
                                 if (role.Type == RoleType.Functional && role.RollsUpTo(roleSYSADMIN) == false)
