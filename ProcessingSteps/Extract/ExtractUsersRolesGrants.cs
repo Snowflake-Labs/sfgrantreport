@@ -17,6 +17,7 @@ using Snowflake.GrantReport.ReportObjects;
 using System;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Reflection;
 
@@ -203,6 +204,73 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
                 #endregion
 
+                #region Future Grants
+
+                List<Grant> grantsToRolesList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Data_RoleShowGrantsTo_FilePath(), new GrantShowGrantsMap(), "No data returned");
+                if (grantsToRolesList != null)
+                {
+                    // Get list of all databases and process them
+                    List<string> databasesList = grantsToRolesList.Where(g => g.ObjectType == "DATABASE").Select(g => g.ObjectName).Distinct().ToList();
+                    if (databasesList != null)
+                    {
+                        loggerConsole.Info("Retrieving future grants in {0} databases", databasesList.Count);
+                        
+                        databasesList.Sort();
+                        databasesList.Remove("ORGANIZATION_USAGE");
+                        databasesList.Remove("SNOWFLAKE");
+
+                        sb = new StringBuilder(256 * databasesList.Count);
+                        sb.AppendFormat("ALTER SESSION SET QUERY_TAG='Snowflake Grant Report Version {0}';", Assembly.GetEntryAssembly().GetName().Version); sb.AppendLine();
+
+                        sb.AppendLine("!set output_format=csv");
+                        sb.AppendLine("!set header=true");
+
+                        sb.AppendLine("USE ROLE SECURITYADMIN;");
+                        sb.AppendFormat("!spool \"{0}\"", FilePathMap.Data_FutureGrantsInDatabases_FilePath()); sb.AppendLine();
+                        for (int i = 0; i< databasesList.Count; i++)
+                        {
+                            sb.AppendFormat("SHOW FUTURE GRANTS IN DATABASE {0};", databasesList[i]); sb.AppendLine();
+                            if (i == 0) { sb.AppendLine("!set header=false"); }
+                        }
+                        sb.AppendLine(@"!spool off");
+
+                        FileIOHelper.SaveFileToPath(sb.ToString(), FilePathMap.Data_FutureGrantsInDatabases_SQLQuery_FilePath(), false);
+
+                        snowSQLDriver.ExecuteSQLStatementsInFile(FilePathMap.Data_FutureGrantsInDatabases_SQLQuery_FilePath(), programOptions.ReportFolderPath);
+                    }
+
+                    // Get list of all schemas and process them
+                    List<string> schemasList = grantsToRolesList.Where(g => g.ObjectType == "SCHEMA").Select(g => g.ObjectName).Distinct().ToList();
+                    if (schemasList != null)
+                    {
+                        loggerConsole.Info("Retrieving future grants in {0} schemas", schemasList.Count);
+                        
+                        schemasList.Sort();
+                        schemasList.RemoveAll(s => s.StartsWith("ORGANIZATION_USAGE."));
+                        schemasList.RemoveAll(s => s.StartsWith("SNOWFLAKE."));
+
+                        sb = new StringBuilder(256 * schemasList.Count);
+                        sb.AppendFormat("ALTER SESSION SET QUERY_TAG='Snowflake Grant Report Version {0}';", Assembly.GetEntryAssembly().GetName().Version); sb.AppendLine();
+
+                        sb.AppendLine("!set output_format=csv");
+                        sb.AppendLine("!set header=true");
+
+                        sb.AppendLine("USE ROLE SECURITYADMIN;");
+                        sb.AppendFormat("!spool \"{0}\"", FilePathMap.Data_FutureGrantsInSchemas_FilePath()); sb.AppendLine();
+                        for (int i = 0; i< schemasList.Count; i++)
+                        {
+                            sb.AppendFormat("SHOW FUTURE GRANTS IN SCHEMA {0};", schemasList[i]); sb.AppendLine();
+                            if (i == 0) { sb.AppendLine("!set header=false"); }
+                        }
+                        sb.AppendLine(@"!spool off");
+
+                        FileIOHelper.SaveFileToPath(sb.ToString(), FilePathMap.Data_FutureGrantsInSchemas_SQLQuery_FilePath(), false);
+
+                        snowSQLDriver.ExecuteSQLStatementsInFile(FilePathMap.Data_FutureGrantsInSchemas_SQLQuery_FilePath(), programOptions.ReportFolderPath);
+                    }
+                }
+
+                #endregion
 
                 return true;
             }

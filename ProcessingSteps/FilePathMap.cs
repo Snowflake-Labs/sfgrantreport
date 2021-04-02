@@ -77,6 +77,16 @@ namespace Snowflake.GrantReport.ProcessingSteps
             return Path.Combine(this.Data_FolderPath(), "ShowGrantsOfRole.sql");
         }
 
+        public string Data_FutureGrantsInDatabases_SQLQuery_FilePath()
+        {
+            return Path.Combine(this.Data_FolderPath(), "ShowFutureGrantsInDatabases.sql");
+        }
+
+        public string Data_FutureGrantsInSchemas_SQLQuery_FilePath()
+        {
+            return Path.Combine(this.Data_FolderPath(), "ShowFutureGrantsInSchemas.sql");
+        }
+
         public string DescribeUserSQLQuery_FilePath()
         {
             return Path.Combine(this.Data_FolderPath(), "DescribeUser.sql");
@@ -260,6 +270,16 @@ namespace Snowflake.GrantReport.ProcessingSteps
         public string Data_RoleShowGrantsOf_FilePath()
         {
             return Path.Combine(this.Data_Grant_FolderPath(), "ROLE_GRANTS_OF.csv");
+        }
+
+        public string Data_FutureGrantsInDatabases_FilePath()
+        {
+            return Path.Combine(this.Data_Grant_FolderPath(), "FUTURE_GRANTS_DATABASES.csv");
+        }
+
+        public string Data_FutureGrantsInSchemas_FilePath()
+        {
+            return Path.Combine(this.Data_Grant_FolderPath(), "FUTURE_GRANTS_SCHEMAS.csv");
         }
 
         public string Input_RoleShowGrantsOf_FilePath()

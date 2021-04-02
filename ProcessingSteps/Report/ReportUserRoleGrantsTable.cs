@@ -1157,6 +1157,12 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
                     cfOPlus.Style.Font.Color.Color = Color.DarkBlue;
                     cfOPlus.Style.Fill.BackgroundColor.Color = Color.LightBlue;
                     cfOPlus.Formula = "=\"O+\"";
+
+                    rangeToFormat = sheet.Cells[headerRowIndex + 1, 3, sheet.Dimension.Rows, 3];
+
+                    var cfFuture = sheet.ConditionalFormatting.AddContainsText(rangeToFormat);
+                    cfFuture.Style.Fill.BackgroundColor.Color = Color.GreenYellow;
+                    cfFuture.Text = "<";
                 }
             }
 
