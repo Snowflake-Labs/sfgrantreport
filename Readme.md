@@ -118,7 +118,12 @@ ERROR(S):
   --version                              Display version information.
 ```
 
-## -c/--connection
+## Retrieving Data
+SFGrantReport supports two modes of getting Role and Grant information:
+* Direct: connect to Snowflake directly and run commands using snowsql (`-c, --connection` option)
+* Offline: use data extracted from Snowflake ACCOUNT_USAGE views (`-i, --input-folder` option)
+
+## -c, --connection
 SFGrantReport can connect to Snowflake directly to retrieve Role and Grant information. 
 
 Use `-c/--connection` parameter to specify the name of the connection in snowsql configuration file. 
@@ -167,7 +172,7 @@ or
 ./SFGrantReport --input-folder path/to/account_usage --output-folder ~/Documents/MyAwesomeOfflineReport
 ```
 
-## -o/--output-folder
+## -o, --output-folder
 Use `-o/--output-folder` parameter to specify where the report files should go (unless you want them created in the same directory you started the tool.
 
 For example, this command uses named connection `mysnowflakeaccount` and creates report in the folder named `MyAwesomeReport` in the Documents folder:
