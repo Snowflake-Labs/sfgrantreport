@@ -82,6 +82,10 @@ Download [Releases](https://github.com/Snowflake-Labs/sfgrantreport/releases/lat
 Download [Releases](https://github.com/Snowflake-Labs/sfgrantreport/releases/latest)\ `SFGrantReport.linux.<version>.zip`, save and extract the archive.
 
 # Run Application
+SFGrantReport supports two mutually exclusive ways of getting Role and Grant information:
+* Direct: connect to Snowflake directly and run commands using snowsql (`-c, --connection` option)
+* Offline: use data extracted from Snowflake ACCOUNT_USAGE views (`-i, --input-folder` option)
+
 ## Available Command Line Parameters
 Get list of Snowflake Grant Report parameters by running this command in your shell:
 
@@ -117,16 +121,10 @@ ERROR(S):
 
   --version                              Display version information.
 ```
-
-## Retrieving Data
-SFGrantReport supports two modes of getting Role and Grant information:
-* Direct: connect to Snowflake directly and run commands using snowsql (`-c, --connection` option)
-* Offline: use data extracted from Snowflake ACCOUNT_USAGE views (`-i, --input-folder` option)
-
 ## -c, --connection
 SFGrantReport can connect to Snowflake directly to retrieve Role and Grant information. 
 
-Use `-c/--connection` parameter to specify the name of the connection in snowsql configuration file. 
+Use `-c, --connection` parameter to specify the name of the connection in snowsql configuration file. 
 
 For example, `mysnowflakeaccount` is a named connection configured in the following fashion:
 
@@ -144,7 +142,7 @@ For full results, the user must have SECURITYADMIN role to to Roles and Users. I
 ## -i, --input-folder
 It is also possible to run SFGrantReport in offline mode, without connecting to Snowflake directly. 
 
-Use '-i, --input-folder' parameter to specify the path to the folder containing exports from [SNOWFLAKE.ACCOUNT_USAGE](https://docs.snowflake.com/en/sql-reference/account-usage.html) share, and specifically from [GRANTS_TO_ROLES](https://docs.snowflake.com/en/sql-reference/account-usage/grants_to_roles.html) and [GRANTS_TO_USERS](https://docs.snowflake.com/en/sql-reference/account-usage/grants_to_users.html) views. 
+Use `-i, --input-folder` parameter to specify the path to the folder containing exports from [SNOWFLAKE.ACCOUNT_USAGE](https://docs.snowflake.com/en/sql-reference/account-usage.html) share, and specifically from [GRANTS_TO_ROLES](https://docs.snowflake.com/en/sql-reference/account-usage/grants_to_roles.html) and [GRANTS_TO_USERS](https://docs.snowflake.com/en/sql-reference/account-usage/grants_to_users.html) views. 
 
 The `SELECT * FROM SNOWFLAKE.ACCOUNT_USAGE.GRANTS_TO_ROLES` query output must be ran as ACCOUNTADMIN and must be saved as `GRANTS_TO_ROLES.csv`: 
 ```
@@ -168,17 +166,21 @@ snowsql -c mysnowflakeaccount -r ACCOUNTADMIN -q "SELECT * FROM SNOWFLAKE.ACCOUN
 With those files exported saved, you can invoke the command to process them offline:
 ```
 ./SFGrantReport -i path/to/account_usage -o ~/Documents/MyAwesomeOfflineReport
+```
 or
+```
 ./SFGrantReport --input-folder path/to/account_usage --output-folder ~/Documents/MyAwesomeOfflineReport
 ```
 
 ## -o, --output-folder
-Use `-o/--output-folder` parameter to specify where the report files should go (unless you want them created in the same directory you started the tool.
+Use `-o, --output-folder` parameter to specify where the report files should go (unless you want them created in the same directory you started the tool.
 
 For example, this command uses named connection `mysnowflakeaccount` and creates report in the folder named `MyAwesomeReport` in the Documents folder:
 ```
 ./SFGrantReport -c mysnowflakeaccount -o ~/Documents/MyAwesomeReport
+```
 or
+```
 ./SFGrantReport --connection mysnowflakeaccount --output-folder ~/Documents/MyAwesomeReport
 ```
 
@@ -188,7 +190,7 @@ Relative paths are supported, like here to go from current folder up two levels:
 ```
 
 ## -d, --delete-previous-report-output
-If the output folder already contains some data, when `-d, --delete-previous-report-output` is specified, the output folder is cleared.
+When `-d, --delete-previous-report-output` is specified and the output folder already contains some data, the output folder is cleared.
 
 # Report Results
 Results are in various `SFGrantReport.<prefix>.<connectionname>.<timestamp of report generation>.xlsx` documents as well as in the Output folder\RPT (in various CSV/PNG/SVG/PDF files):
