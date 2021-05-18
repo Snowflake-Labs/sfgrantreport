@@ -370,6 +370,8 @@ namespace Snowflake.GrantReport.ProcessingSteps
                 #endregion
 
                 // Come up with roles list for later steps too
+                if (grantsOnRolesList == null) grantsOnRolesList = new List<Grant>();
+                
                 List<Role> rolesList = new List<Role>();
                 List<string> rolesInThisAccountList = grantsOnRolesList.Where(g => g.ObjectType == "ROLE").Select(g => g.ObjectName).Distinct().ToList();
                 foreach (string roleName in rolesInThisAccountList)

@@ -125,7 +125,7 @@ namespace Snowflake.GrantReport
                 using (Process process = new Process())
                 {
                     process.StartInfo.FileName = this.ExecutableFilePath;
-                    process.StartInfo.Arguments = String.Format("--connection {0} --filename \"{1}\" --variable reportfolderpath=\"{2}\"", this.Connection, sqlFilePath, outputFolderPath); 
+                    process.StartInfo.Arguments = String.Format("--connection {0} --filename \"{1}\" --option variable_substitution=true --variable reportfolderpath=\"{2}\"", this.Connection, sqlFilePath, outputFolderPath); 
                     process.StartInfo.UseShellExecute = false;
                     process.StartInfo.RedirectStandardOutput = false;
                     process.StartInfo.RedirectStandardError = false;

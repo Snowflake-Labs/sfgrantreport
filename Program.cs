@@ -176,6 +176,26 @@ namespace Snowflake.GrantReport
                 programOptions.ReportJob = reportJob;
             }
 
+            // Check for input files if we're pulling from offline files from Snowhouse
+            if (programOptions.InputFolderPath.Length > 0)
+            {
+                FilePathMap filePathMap = new FilePathMap(programOptions);
+                if (File.Exists(filePathMap.Input_RoleShowGrantsToAndOn_FilePath()) == false)
+                {
+                    logger.Warn("File {0} must exist when loading from offline files", filePathMap.Input_RoleShowGrantsToAndOn_FilePath());
+                    loggerConsole.Warn("File {0} must exist when loading from offline files", filePathMap.Input_RoleShowGrantsToAndOn_FilePath());
+
+                    return;
+                }
+                if (File.Exists(filePathMap.Input_RoleShowGrantsOf_FilePath()) == false)
+                {
+                    logger.Warn("File {0} must exist when loading from offline files", filePathMap.Input_RoleShowGrantsOf_FilePath());
+                    loggerConsole.Warn("File {0} must exist when loading from offline files", filePathMap.Input_RoleShowGrantsOf_FilePath());
+
+                    return;
+                }
+            }
+
             // Run report generation
             JobStepRouter.ExecuteJobThroughSteps(programOptions);
         }
