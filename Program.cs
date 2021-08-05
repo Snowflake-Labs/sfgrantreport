@@ -120,6 +120,10 @@ namespace Snowflake.GrantReport
             {
                 programOptions.InputFolderPath = Path.GetFullPath(programOptions.InputFolderPath);
             }
+            else
+            {
+                programOptions.InputFolderPath = String.Empty;
+            }
 
             // Create Output folder if it doesn't exist
             if (Directory.Exists(programOptions.ReportFolderPath) == false)
