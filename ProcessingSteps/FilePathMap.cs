@@ -342,6 +342,11 @@ namespace Snowflake.GrantReport.ProcessingSteps
             return Path.Combine(this.Report_Role_FolderPath(), "ROLE_MEMBERS.csv");
         }
 
+        public string Report_RoleGrant_Differences_FilePath()
+        {
+            return Path.Combine(this.Report_Grant_FolderPath(), "GRANTDIFFERENCES.csv");
+        }
+
         public string UsersRolesAndGrantsExcelReportFilePath()
         {
             if (this.ProgramOptions.ReportJob.Connection != null && this.ProgramOptions.ReportJob.Connection.Length > 0)
@@ -364,6 +369,11 @@ namespace Snowflake.GrantReport.ProcessingSteps
             {
                 return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("SFGrantReport.{0}.{1}.{2:yyyyMMddHHmm}.xlsx", sheetSetName, new DirectoryInfo(this.ProgramOptions.InputFolderPath).Name, this.ProgramOptions.ReportJob.DataRetrievedOnUtc));
             }
+        }
+
+        public string GrantsDifferencesExcelReportFilePath()
+        {
+            return Path.Combine(this.ProgramOptions.ReportFolderPath, String.Format("SFGrantReport.Differences.{0:yyyyMMddHHmm}.xlsx", DateTime.UtcNow));
         }
 
         #endregion

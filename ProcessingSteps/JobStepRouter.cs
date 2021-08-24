@@ -14,6 +14,7 @@
 // under the License.
 
 using NLog;
+using System;
 using System.Collections.Generic;
 
 namespace Snowflake.GrantReport.ProcessingSteps
@@ -34,10 +35,12 @@ namespace Snowflake.GrantReport.ProcessingSteps
             IndexGrantDetails = 201,
             IndexGrantDetailsAccountUsage = 202,
             IndexRoleAndGrantHierarchy = 203,
+            IndexGrantDifferences = 204,
 
             // Report steps
             ReportUserRoleGrantsTable = 300,
             ReportUserRoleGrantHierarchyGraphViz = 301,
+            ReportGrantDifferences = 302,
 
             // The rest
             Done = 500,
@@ -55,10 +58,12 @@ namespace Snowflake.GrantReport.ProcessingSteps
                 JobStatus.IndexGrantDetails,
                 JobStatus.IndexGrantDetailsAccountUsage,
                 JobStatus.IndexRoleAndGrantHierarchy,
+                JobStatus.IndexGrantDifferences,
 
                 // Report data
                 JobStatus.ReportUserRoleGrantsTable,
                 JobStatus.ReportUserRoleGrantHierarchyGraphViz,
+                JobStatus.ReportGrantDifferences,
 
                 // Done 
                 JobStatus.Done,
@@ -121,12 +126,16 @@ namespace Snowflake.GrantReport.ProcessingSteps
                     return new IndexGrantDetailsAccountUsage();
                 case JobStatus.IndexRoleAndGrantHierarchy:
                     return new IndexRoleAndGrantHierarchy();
+                case JobStatus.IndexGrantDifferences:
+                    return new IndexGrantDifferences();
 
                 // Report data
                 case JobStatus.ReportUserRoleGrantsTable:
                     return new ReportUserRoleGrantsTable();
                 case JobStatus.ReportUserRoleGrantHierarchyGraphViz:
                     return new ReportUserRoleGrantHierarchyGraphViz();
+                case JobStatus.ReportGrantDifferences:
+                    return new ReportGrantDifferences();
 
                 default:
                     break;

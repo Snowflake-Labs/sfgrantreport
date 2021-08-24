@@ -256,7 +256,18 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
 
         public override bool ShouldExecute(ProgramOptions programOptions)
         {
-            return true;
+            if ((programOptions.ConnectionName != null && programOptions.ConnectionName.Length > 0) || (programOptions.InputFolderPath != null && programOptions.InputFolderPath.Length > 0))
+            {
+                logger.Trace("Connection name or Input Folder Path is not empty. Will execute");
+                loggerConsole.Trace("Connection name or Input Folder Path is not empty. Will execute");
+                return true;
+            }
+            else
+            {
+                logger.Trace("Connection name or Input Folder Path is empty. Skipping this step");
+                loggerConsole.Trace("Connection name or Input Folder Path is empty. Skipping this step");
+                return false;
+            }
         }
 
         private void generateExcelReport(ProgramOptions programOptions, List<string> sheetsToIncludeList, string reportFilePath)        
@@ -1176,7 +1187,7 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
 
             #endregion
 
-            #region Save file            
+            #region Save file
 
             logger.Info("Saving Excel report {0}", reportFilePath);
             loggerConsole.Info("Saving Excel report {0}", reportFilePath);

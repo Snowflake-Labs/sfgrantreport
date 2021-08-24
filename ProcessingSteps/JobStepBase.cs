@@ -47,6 +47,16 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
         #endregion
 
+        #region Comparison variables
+
+        public const string PROPERTY_ENTIRE_OBJECT = "EntireObject";
+        public const string DIFFERENCE_IDENTICAL = "IDENTICAL";
+        public const string DIFFERENCE_MISSING = "MISSING (only L)";
+        public const string DIFFERENCE_EXTRA = "EXTRA (only R)";
+        public const string DIFFERENCE_DIFFERENT = "DIFFERENT";
+
+        #endregion
+
         internal static Logger logger = LogManager.GetCurrentClassLogger();
         internal static Logger loggerConsole = LogManager.GetLogger("Snowflake.GrantReport.Console");
 

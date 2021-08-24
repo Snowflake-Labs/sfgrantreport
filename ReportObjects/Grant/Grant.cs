@@ -274,7 +274,7 @@ namespace Snowflake.GrantReport.ReportObjects
         { 
             get
             {
-                return String.Format("{0}-{1}-{2}-{3}-{4}", this.Privilege, this.ObjectType, this.ObjectName, this.GrantedTo, this.GrantedBy);
+                return String.Format("{0}-{1}-{2}-{3}", this.Privilege, this.ObjectType, this.ObjectName, this.GrantedTo);
             }        
         }
 

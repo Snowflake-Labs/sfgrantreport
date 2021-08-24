@@ -116,13 +116,34 @@ namespace Snowflake.GrantReport
                 Thread.Sleep(2000);
             } 
 
-            if (programOptions.InputFolderPath != null && programOptions.InputFolderPath.Length > 0)
+            // Input path for the offline files
+            if (programOptions.InputFolderPath == null || programOptions.InputFolderPath.Length == 0)
             {
-                programOptions.InputFolderPath = Path.GetFullPath(programOptions.InputFolderPath);
+                programOptions.InputFolderPath = String.Empty;
             }
             else
             {
-                programOptions.InputFolderPath = String.Empty;
+                programOptions.InputFolderPath = Path.GetFullPath(programOptions.InputFolderPath);
+            }
+
+            // Comparison - left side
+            if (programOptions.LeftReportFolderPath == null || programOptions.LeftReportFolderPath.Length == 0)
+            {
+                programOptions.LeftReportFolderPath = String.Empty;
+            }
+            else
+            {
+                programOptions.LeftReportFolderPath = Path.GetFullPath(programOptions.LeftReportFolderPath);
+            }
+
+            // Comparison - right side
+            if (programOptions.RightReportFolderPath == null || programOptions.RightReportFolderPath.Length == 0)
+            {
+                programOptions.RightReportFolderPath = String.Empty;
+            }
+            else
+            {
+                programOptions.RightReportFolderPath = Path.GetFullPath(programOptions.RightReportFolderPath);
             }
 
             // Create Output folder if it doesn't exist

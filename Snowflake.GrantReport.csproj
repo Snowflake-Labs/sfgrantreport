@@ -7,9 +7,9 @@
     <AssemblyName>SFGrantReport</AssemblyName>
     <RootNamespace>Snowflake.GrantReport</RootNamespace>
 
-    <Version>2021.5.17.1</Version>
-    <FileVersion>2021.5.17.1</FileVersion>
-    <AssemblyVersion>2021.5.17.1</AssemblyVersion>
+    <Version>2021.8.23.0</Version>
+    <FileVersion>2021.8.23.0</FileVersion>
+    <AssemblyVersion>2021.8.23.0</AssemblyVersion>
     <Authors>Daniel Odievich (daniel.odievich@snowflake.com)</Authors>
     <Company>Snowflake Computing</Company>
     <Product>Snowflake Grant Report</Product>
@@ -31,8 +31,8 @@
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
     <PackageReference Include="CsvHelper" Version="19.0.0" />
     <PackageReference Include="EPPlus" Version="4.5.3.3" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="NLog" Version="4.7.6" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="NLog" Version="4.7.10" />
   </ItemGroup>
 
   <ItemGroup>

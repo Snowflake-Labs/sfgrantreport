@@ -29,6 +29,12 @@ namespace Snowflake.GrantReport
         [Option('o', "output-folder", Required = false, HelpText = "Output folder where to create report.")]
         public string ReportFolderPath { get; set; }
 
+        [Option('l', "left-folder-compare", Required = true, HelpText = "Left folder containing report files to compare against.", SetName = "compare")]
+        public string LeftReportFolderPath { get; set; }
+        
+        [Option('r', "right-folder-compare", Required = true, HelpText = "Right folder containing report files to compare with.", SetName = "compare")]
+        public string RightReportFolderPath { get; set; }
+        
         [Option('d', "delete-previous-report-output", Required = false, HelpText = "If true, delete any results of previous processing.")]
         public bool DeletePreviousReportOutput { get; set; }
 
@@ -42,12 +48,14 @@ namespace Snowflake.GrantReport
         public override string ToString()
         {
             return String.Format(
-                "ProgramOptions: ConnectionName='{0}' OutputFolderPath='{1}' DeletePreviousReportOutput='{2}' InputFolderPath='{3}' ProcessSequentially='{4}'",
+                "ProgramOptions: ConnectionName='{0}' OutputFolderPath='{1}' DeletePreviousReportOutput='{2}' InputFolderPath='{3}' ProcessSequentially='{4}' LeftReportFolderPath='{4}' RightReportFolderPath='{4}'",
                 this.ConnectionName, 
                 this.ReportFolderPath, 
                 this.DeletePreviousReportOutput,
                 this.InputFolderPath,
-                this.ProcessSequentially);
+                this.ProcessSequentially,
+                this.LeftReportFolderPath,
+                this.RightReportFolderPath);
         }
     }
 

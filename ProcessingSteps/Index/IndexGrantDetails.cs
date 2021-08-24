@@ -108,8 +108,8 @@ namespace Snowflake.GrantReport.ProcessingSteps
                 loggerConsole.Info("Removing duplicate grants");
 
                 // Now remove duplicate USAGE and OWNERSHIP rows using these kinds of IDs
-                // OWNERSHIP-ROLE-AAD_PROVISIONER-USERADMIN-USERADMIN
-                // USAGE-ROLE-AAD_PROVISIONER-USERADMIN-USERADMIN
+                // OWNERSHIP-ROLE-AAD_PROVISIONER-USERADMIN
+                // USAGE-ROLE-AAD_PROVISIONER-USERADMIN
                 // These occur only on ROLEs and because a role in hierarchy can be seen when parent says SHOW GRANTS ON and child says SHOW GRANTS TO
                 List<Grant> grantsUniqueList = new List<Grant>(grantsNonUniqueList.Count);
                 var uniqueGrantsGrouped = grantsNonUniqueList.GroupBy(g => g.UniqueIdentifier);

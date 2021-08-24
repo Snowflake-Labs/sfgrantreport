@@ -482,7 +482,18 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
         public override bool ShouldExecute(ProgramOptions programOptions)
         {
-            return true;
+            if ((programOptions.ConnectionName != null && programOptions.ConnectionName.Length > 0) || (programOptions.InputFolderPath != null && programOptions.InputFolderPath.Length > 0))
+            {
+                logger.Trace("Connection name or Input Folder Path is not empty. Will execute");
+                loggerConsole.Trace("Connection name or Input Folder Path is not empty. Will execute");
+                return true;
+            }
+            else
+            {
+                logger.Trace("Connection name or Input Folder Path is empty. Skipping this step");
+                loggerConsole.Trace("Connection name or Input Folder Path is empty. Skipping this step");
+                return false;
+            }
         }
     }
 }
