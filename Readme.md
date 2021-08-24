@@ -1,7 +1,7 @@
 # Snowflake Grant Report
 Snowflake Role-based Access Control (RBAC) offers customers powerful tools to configure authorization to secure their systems, including ability to build a hierarchy of roles and assign mix of granular permissions for combined effective permissions. For more information, see [Overview of Access Control](https://docs.snowflake.com/en/user-guide/security-access-control-overview.html).
 
-Snowflake Grant Report extracts Roles and Grants data from Snowflake and provides tabular and visual reports on the Role hierarchy and Grant assignments.
+Snowflake Grant Report extracts Roles and Grants data from Snowflake and provides tabular and visual reports on the Role hierarchy and Grant assignments. The tool also provides ability to compare privilege configuration between two different reports, enabling analysis of privilege changes over time in same or even different accounts.
 
 ## Visualizing Role Hierarchy
 Visual representation of Role hierarchy and databases used by those Roles, with Roles color-coded to their type and location within the hierarchy, offering online graph visualization as well PNG, SVG and PDF versions.
@@ -9,7 +9,7 @@ Visual representation of Role hierarchy and databases used by those Roles, with 
 
 For more information, see [Role Hiearchy Reports](../../wiki/Role-Hierarchy-Reports).
 
-## Tabular Report
+## Tabular Report for Grants
 All Grants for the TABLE Object Type:
 ![](docs/Grants/Grants.Tbl.TABLE.png?raw=true)
 
@@ -20,10 +20,16 @@ All Roles created over years and months by different Owner Roles:
 ![](docs/Roles/Roles.CreatedTimeline.png?raw=true)
 
 Showing all Grants for Schema, Table and View object in a Database:
-
 ![](docs/Grants/DB.EXAMPLE.png?raw=true)
 
 For more information, see [Table Reports](../../wiki/Table-Reports).
+
+## Comparing Two Reports 
+Audit changes in privileges between two different reports: 
+![](docs/Compare/DifferencesTable.png?raw=true)
+
+And a pivot by type:
+![](docs/Compare/DifferencesByTypePivot.png?raw=true)
 
 # Install Prerequisites
 ## Install SnowSQL
@@ -101,13 +107,15 @@ Windows:
 
 You should see something like that:
 ```
-Snowflake Grant Report Version 2021.2.12.0
-SFGrantReport 2021.2.12.0
+Snowflake Grant Report Version 2021.8.10.0
+SFGrantReport 2021.8.10.0
 Copyright c 2020-2021
 
 ERROR(S):
   Required option 'c, connection' is missing.
   Required option 'i, input-folder' is missing.
+  Required option 'l, left-folder-compare' is missing.
+  Required option 'r, right-folder-compare' is missing.
 
   -c, --connection                       Required. Name of the SnowSQL connection entry that will be used to connect to Snowflake.
 
@@ -115,12 +123,19 @@ ERROR(S):
 
   -o, --output-folder                    Output folder where to create report.
 
+  -l, --left-folder-compare              Required. Left folder containing report files to compare against.
+
+  -r, --right-folder-compare             Required. Right folder containing report files to compare with.
+
   -d, --delete-previous-report-output    If true, delete any results of previous processing.
+
+  -s, --sequential-processing            If true, process certain items during extraction and conversion sequentially.
 
   --help                                 Display this help screen.
 
   --version                              Display version information.
 ```
+
 ## -c, --connection
 SFGrantReport can connect to Snowflake directly to retrieve Role and Grant information. 
 
@@ -137,21 +152,30 @@ warehousename = MY_WAREHOUSE
 dbname = MY_DATABASE
 ```
 
-For full results, the user must have SECURITYADMIN role to to Roles and Users. If user has is a SYSADMIN or below, DESCRIBE USER command is unlikely to return all the data, but grant hierarchy should work.
+For example:
+```
+./SFGrantReport -c mysnowflakeaccount -o ~/Documents/MyAwesomeReport
+```
+or
+```
+./SFGrantReport --connection mysnowflakeaccount --output-folder ~/Documents/MyAwesomeReport
+```
+
+For full results, the user should have SECURITYADMIN role to to Roles and Users. If user has is a SYSADMIN or below, DESCRIBE USER command is unlikely to return all the data, but grant hierarchy should work.
 
 ## -i, --input-folder
 It is also possible to run SFGrantReport in offline mode, without connecting to Snowflake directly. 
 
 Use `-i, --input-folder` parameter to specify the path to the folder containing exports from [SNOWFLAKE.ACCOUNT_USAGE](https://docs.snowflake.com/en/sql-reference/account-usage.html) share, and specifically from [GRANTS_TO_ROLES](https://docs.snowflake.com/en/sql-reference/account-usage/grants_to_roles.html) and [GRANTS_TO_USERS](https://docs.snowflake.com/en/sql-reference/account-usage/grants_to_users.html) views. 
 
-The `SELECT * FROM SNOWFLAKE.ACCOUNT_USAGE.GRANTS_TO_ROLES` query output must be ran as ACCOUNTADMIN and must be saved as `GRANTS_TO_ROLES.csv`: 
+The `SELECT * FROM SNOWFLAKE.ACCOUNT_USAGE.GRANTS_TO_ROLES` query should typically ran as ACCOUNTADMIN and the output MUST be saved as `GRANTS_TO_ROLES.csv`: 
 ```
-snowsql -c [your named connection name] -r ACCOUNTADMIN -q "SELECT * FROM SNOWFLAKE.ACCOUNT_USAGE.GRANTS_TO_ROLES;" -o output_format=csv -o header=true -o timing=false -o friendly=false > [path to your output]/GRANTS_TO_ROLES.csv
+snowsql -c [your named connection name] -r ACCOUNTADMIN -q "SELECT * FROM SNOWFLAKE.ACCOUNT_USAGE.GRANTS_TO_ROLES" -o output_format=csv -o header=true -o timing=false -o friendly=false > [path to your output]/GRANTS_TO_ROLES.csv
 ```
 
-The `SELECT * FROM SNOWFLAKE.ACCOUNT_USAGE.GRANTS_TO_USERS` query output MUST be saved as `GRANTS_TO_USERS.csv`:
+The `SELECT * FROM SNOWFLAKE.ACCOUNT_USAGE.GRANTS_TO_USERS` query should typically ran as ACCOUNTADMIN and the output MUST be saved as `GRANTS_TO_USERS.csv`:
 ```
-snowsql -c [your named connection name] -r ACCOUNTADMIN -q "SELECT * FROM SNOWFLAKE.ACCOUNT_USAGE.GRANTS_TO_USERS;" -o output_format=csv -o header=true -o timing=false -o friendly=false > [path to your output]/GRANTS_TO_USERS.csv
+snowsql -c [your named connection name] -r ACCOUNTADMIN -q "SELECT * FROM SNOWFLAKE.ACCOUNT_USAGE.GRANTS_TO_USERS" -o output_format=csv -o header=true -o timing=false -o friendly=false > [path to your output]/GRANTS_TO_USERS.csv
 ```
 
 In this example, SnowSQL 'mysnowflakeaccount' named connection is used to connect as ACCOUNTADMIN and output necessary files to `account_usage/GRANTS_TO_ROLES.csv` and `account_usage/GRANTS_TO_USERS.csv`:
@@ -173,7 +197,7 @@ or
 ```
 
 ## -o, --output-folder
-Use `-o, --output-folder` parameter to specify where the report files should go (unless you want them created in the same directory you started the tool.
+Use `-o, --output-folder` parameter to specify where the report files should go (unless you want them created in the same directory you started the tool).
 
 For example, this command uses named connection `mysnowflakeaccount` and creates report in the folder named `MyAwesomeReport` in the Documents folder:
 ```
@@ -187,6 +211,23 @@ or
 Relative paths are supported, like here to go from current folder up two levels:
 ```
 ./SFGrantReport --connection mysnowflakeaccount --output-folder ../../MyAwesomeReport
+```
+
+## -l, --left-folder-compare
+When you have two outputs of same account at two different points at time, or even two different accounts, you can compare them.
+
+Use `-l, --left-folder-compare` parameter to specify where the files are for the left/reference side of the comparison.
+
+## -r, --right-folder-compare
+Use `-r, --right-folder-compare` parameter to specify where the files are for the right/difference side of the comparison.
+
+For example, this command uses :
+```
+./SFGrantReport.exe -l ~/Documents/myaccount/statusonday1 -r ~/Documents/myaccount/statusonday42 -o ~/Documents/myaccount/day1today42comparison
+```
+or
+```
+./SFGrantReport.exe --left-folder-compare ~/Documents/myaccount/statusonday1 --right-folder-compare ~/Documents/myaccount/statusonday42 --output-folder ~/Documents/myaccount/day1today42comparison
 ```
 
 ## -d, --delete-previous-report-output

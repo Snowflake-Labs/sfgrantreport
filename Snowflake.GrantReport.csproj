@@ -7,9 +7,9 @@
     <AssemblyName>SFGrantReport</AssemblyName>
     <RootNamespace>Snowflake.GrantReport</RootNamespace>
 
-    <Version>2021.8.23.0</Version>
-    <FileVersion>2021.8.23.0</FileVersion>
-    <AssemblyVersion>2021.8.23.0</AssemblyVersion>
+    <Version>2021.8.24.0</Version>
+    <FileVersion>2021.8.24.0</FileVersion>
+    <AssemblyVersion>2021.8.24.0</AssemblyVersion>
     <Authors>Daniel Odievich (daniel.odievich@snowflake.com)</Authors>
     <Company>Snowflake Computing</Company>
     <Product>Snowflake Grant Report</Product>
@@ -24,7 +24,8 @@
     <PackageTags></PackageTags>
     <PackageReleaseNotes></PackageReleaseNotes>
     <ApplicationIcon>Snowflake.ico</ApplicationIcon>  
-    <DebugType>embedded</DebugType>  
+    <DebugType>embedded</DebugType>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

@@ -387,6 +387,12 @@ namespace Snowflake.GrantReport.ProcessingSteps
             sheet.Cells[l, 1].Value = "Input Folder";
             sheet.Cells[l, 2].Value = programOptions.ReportJob.InputFolder;
             l++;
+            sheet.Cells[l, 1].Value = "Left Folder";
+            sheet.Cells[l, 2].Value = programOptions.LeftReportFolderPath;
+            l++;
+            sheet.Cells[l, 1].Value = "Right Folder";
+            sheet.Cells[l, 2].Value = programOptions.ReportFolderPath;
+            l++;
 
             sheet.Column(1).Width = 25;
             sheet.Column(2).Width = 25;
