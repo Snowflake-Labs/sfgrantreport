@@ -267,7 +267,6 @@ namespace Snowflake.GrantReport.ReportObjects
             }
         }
 
-
         public string SchemaName { get; set; }
 
         public string UniqueIdentifier

@@ -57,6 +57,63 @@ namespace Snowflake.GrantReport.ReportObjects
         
         public DateTime? CreatedOnUTCRight { get; set; }
 
+        public string PrivilegeDisplayShort(Dictionary<string, string> privilegeNamesShortDict)
+        { 
+            string shortName = String.Empty;
+            if (privilegeNamesShortDict.TryGetValue(this.Privilege, out shortName) == true)
+            {
+                if (this.WithGrantOptionLeft == true || this.WithGrantOptionRight == true == true)
+                {
+                    return String.Format("{0}+", shortName);
+                }
+                else
+                {
+                    return shortName;
+                }
+            }
+            else
+            {
+                // Take first two characters
+                string[] words = this.Privilege.Split(' ');
+                List<string> shorterWords = new List<string>(words.Length);
+                foreach (string word in words)
+                {
+                    shorterWords.Add(word.Substring(0, 2));
+
+                }
+                shortName = String.Join('_', shorterWords.ToArray());
+                return shortName;
+            }
+        }
+
+        public int PrivilegeOrder(Dictionary<string, int> privilegeOrderDict)
+        { 
+            int order = -1;
+            if (privilegeOrderDict.TryGetValue(this.Privilege, out order) == true)
+            {
+                return order;
+            }
+            else
+            {
+                return 1000;
+            }
+        }
+
+        public string PrivilegeDisplayLong
+        { 
+            get
+            {
+                if (this.WithGrantOptionLeft == true || this.WithGrantOptionRight == true)
+                {
+                    return String.Format("{0}+", this.Privilege);
+                }
+                else
+                {
+                    return this.Privilege;
+                }
+            }
+        }
+
         public override String ToString()
         {
             return String.Format(

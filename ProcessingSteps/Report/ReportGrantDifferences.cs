@@ -38,6 +38,8 @@ namespace Snowflake.GrantReport.ProcessingSteps
         private const string TABLE_DIFFERENCES = "t_Differences";
         private const string PIVOT_DIFFERENCES_TYPE = "p_Differences_Type";
         private const string GRAPH_DIFFERENCES_TYPE = "p_Differences_Type";
+        private const string SHEET_GRANT_DIFFERENCES_PER_OBJECT_TYPE = "Diffs.{0}";
+        private const string TABLE_GRANT_DIFFERENCES_PER_OBJECT_TYPE = "t_GrantDiffs_{0}";
 
         private const int LIST_SHEET_START_TABLE_AT = 4;
         private const int PIVOT_SHEET_START_PIVOT_AT = 7;
@@ -203,6 +205,147 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
                 #endregion
 
+                #region Objects / Roles Differences sheet
+
+                // Build the table 
+                // Object       | Role 1    | Role 2    | ...   | Role N
+                // -----------------------------------------------------
+                // DB1          | +U, O     |           |       | +U
+                // DB2          | -U, O     | ~U        |       |  
+                // DB2          | -U, O     | U         |       |  
+
+                List<GrantDifference> grantDifferencesList = FileIOHelper.ReadListFromCSVFile<GrantDifference>(FilePathMap.Report_RoleGrant_Differences_FilePath(), new GrantDifferenceMap());
+                if (grantDifferencesList != null)
+                {
+                    var groupObjectTypesGrouped = grantDifferencesList.GroupBy(g => g.ObjectType);
+
+                    foreach (var groupObjectType in groupObjectTypesGrouped)
+                    {
+                        string objectType = groupObjectType.Key;
+                        Dictionary<string, int> roleToHeaderMapping = new Dictionary<string, int>();
+
+                        loggerConsole.Info("Processing grants differences for {0}", objectType);
+
+                        List<GrantDifference> grantDifferencesOfObjectTypeList = groupObjectType.ToList();
+
+                        sheet = excelReport.Workbook.Worksheets.Add(getShortenedNameForExcelSheet(String.Format(SHEET_GRANT_DIFFERENCES_PER_OBJECT_TYPE, objectType)));
+                        sheet.Cells[1, 1].Value = "Table of Contents";
+                        sheet.Cells[1, 2].Formula = String.Format(@"=HYPERLINK(""#'{0}'!A1"", ""<Go>"")", SHEET_TOC);
+                        sheet.Cells[1, 2].StyleName = "HyperLinkStyle";
+                        sheet.Cells[2, 1].Value = "Left";
+                        sheet.Cells[2, 2].Value = programOptions.LeftReportFolderPath;
+                        sheet.Cells[3, 1].Value = "Right";
+                        sheet.Cells[3, 2].Value = programOptions.RightReportFolderPath;
+                        sheet.Cells[4, 1].Value = "Type";
+                        sheet.Cells[4, 2].Value = objectType;
+                        sheet.View.FreezePanes(LIST_SHEET_START_TABLE_AT + 2, 3);
+
+                        logger.Info("{0} Sheet", sheet.Name);
+                        loggerConsole.Info("{0} Sheet", sheet.Name);
+
+                        int headerRowIndex = LIST_SHEET_START_TABLE_AT + 1;
+                        int roleColumnBeginIndex = 3;
+                        int roleColumnMaxIndex = roleColumnBeginIndex;
+
+                        // Header row
+                        sheet.Cells[headerRowIndex, 1].Value = "Full Name";
+                        sheet.Cells[headerRowIndex, 2].Value = "Short Name";
+
+                        int currentRowIndex = headerRowIndex;
+                        currentRowIndex++;
+
+                        var groupObjectNameGrouped = grantDifferencesOfObjectTypeList.GroupBy(g => g.ObjectName);                        
+                        foreach (var groupObjectName in groupObjectNameGrouped)                        
+                        {
+                            GrantDifference grantDifferenceObjectToOperateOn = groupObjectName.First();
+                            sheet.Cells[currentRowIndex, 1].Value = grantDifferenceObjectToOperateOn.ObjectName;
+                            sheet.Cells[currentRowIndex, 2].Value = grantDifferenceObjectToOperateOn.EntityName;
+
+                            List<GrantDifference> grantDifferencesOfThisObjectList = groupObjectName.ToList();
+                            var grantsByRoleNameGroups = grantDifferencesOfThisObjectList.GroupBy(g => g.GrantedTo);
+                            foreach (var grantsByRoleNameGroup in grantsByRoleNameGroups)
+                            {
+                                GrantDifference firstGrantDifference = grantsByRoleNameGroup.First();
+                                int thisRoleColumnIndex = 0;
+                                if (roleToHeaderMapping.ContainsKey(firstGrantDifference.GrantedTo) == false)
+                                {
+                                    // Add another Role to the header
+                                    thisRoleColumnIndex = roleColumnMaxIndex;
+                                    roleToHeaderMapping.Add(firstGrantDifference.GrantedTo, thisRoleColumnIndex);
+                                    sheet.Cells[headerRowIndex, thisRoleColumnIndex].Value = firstGrantDifference.GrantedTo;
+                                    roleColumnMaxIndex++;
+                                }
+                                else
+                                {
+                                    // Previously seen
+                                    thisRoleColumnIndex = roleToHeaderMapping[firstGrantDifference.GrantedTo];
+                                }
+                                sheet.Cells[currentRowIndex, thisRoleColumnIndex].Value = grantsByRoleNameGroup.ToList().Count();
+                                outputGrantDifferencestToCell(sheet.Cells[currentRowIndex, thisRoleColumnIndex], grantsByRoleNameGroup.ToList());
+                            }
+
+                            currentRowIndex++;
+                        }
+
+                        range = sheet.Cells[headerRowIndex, 1, sheet.Dimension.Rows, sheet.Dimension.Columns];
+                        try
+                        {
+                            table = sheet.Tables.Add(range, getExcelTableOrSheetSafeString(String.Format(TABLE_GRANT_DIFFERENCES_PER_OBJECT_TYPE, objectType)));
+                        }
+                        catch (ArgumentException ex)
+                        {
+                            if (ex.Message == "Tablename is not unique")
+                            {
+                                table = sheet.Tables.Add(range, String.Format("{0}_1", getExcelTableOrSheetSafeString(String.Format(TABLE_GRANT_DIFFERENCES_PER_OBJECT_TYPE, objectType))));
+                            }
+                        }
+                        table.ShowHeader = true;
+                        table.TableStyle = TableStyles.Light18;
+                        table.ShowFilter = true;
+                        table.ShowTotal = false;
+                    
+                        sheet.Column(1).Width = 30;
+                        sheet.Column(2).Width = 20;
+
+                        // Make the column for permissions headers angled downwards 45 degrees
+                        for (int i = roleColumnBeginIndex; i <= table.Columns.Count; i++)
+                        {
+                            sheet.Cells[headerRowIndex, i].Style.TextRotation = 135;
+                            sheet.Column(i).Width = 7;
+                        }
+
+                        // Format the cells
+                        ExcelRangeBase rangeToFormat = sheet.Cells[headerRowIndex + 1, 3, sheet.Dimension.Rows, sheet.Dimension.Columns];
+                        rangeToFormat.StyleName = "ShortDifferencesStyle";
+
+                        var cfMoreThanOne = sheet.ConditionalFormatting.AddContainsText(rangeToFormat);
+                        cfMoreThanOne.Style.Font.Color.Color = Color.Black;
+                        cfMoreThanOne.Style.Fill.BackgroundColor.Color = Color.MediumOrchid;
+                        cfMoreThanOne.Text = "-and-";
+                        cfMoreThanOne.StopIfTrue = true;
+
+                        var cfMissing= sheet.ConditionalFormatting.AddContainsText(rangeToFormat);
+                        cfMissing.Style.Font.Color.Color = Color.Black;
+                        cfMissing.Style.Fill.BackgroundColor.Color = colorMissing;
+                        cfMissing.Text = "<<";
+
+                        var cfExtra = sheet.ConditionalFormatting.AddContainsText(rangeToFormat);
+                        cfExtra.Style.Font.Color.Color = Color.Black;
+                        cfExtra.Style.Fill.BackgroundColor.Color = colorExtra;
+                        cfExtra.Text = ">>";
+
+                        var cfDifferent= sheet.ConditionalFormatting.AddContainsText(rangeToFormat);
+                        cfDifferent.Style.Font.Color.Color = Color.Black;
+                        cfDifferent.Style.Fill.BackgroundColor.Color = colorDifferent;
+                        cfDifferent.Text = "~~";
+
+                        logger.Info("{0} Sheet ({1} rows)", sheet.Name, sheet.Dimension.Rows);
+                        loggerConsole.Info("{0} Sheet ({1} rows)", sheet.Name, sheet.Dimension.Rows);
+                    }
+                }
+
+                #endregion
+
                 #region TOC sheet
 
                 // TOC sheet again
@@ -272,5 +415,59 @@ namespace Snowflake.GrantReport.ProcessingSteps
                 return false;
             }
         }
+
+        private void outputGrantDifferencestToCell(ExcelRangeBase cell, List<GrantDifference> listOfGrantDifferences)
+        {
+            if (listOfGrantDifferences.Count == 0) return;
+
+            // Missing
+            string missingValues = String.Join(',', listOfGrantDifferences.Where(g => g.Difference == DIFFERENCE_MISSING).OrderBy(g => g.PrivilegeOrder(privilegeOrderDict)).ToList().Select(g => g.PrivilegeDisplayShort(privilegeNamesShortDict)).ToArray());
+            if (missingValues.Length > 0)
+            {
+                missingValues = String.Format("<<{0}", missingValues);
+            }
+
+            // Extra
+            string extraValues = String.Join(',', listOfGrantDifferences.Where(g => g.Difference == DIFFERENCE_EXTRA).OrderBy(g => g.PrivilegeOrder(privilegeOrderDict)).ToList().Select(g => g.PrivilegeDisplayShort(privilegeNamesShortDict)).ToArray());
+            if (extraValues.Length > 0)
+            {
+                extraValues = String.Format(">>{0}", extraValues);
+            }
+
+            // Different
+            string differentValues = String.Join(',', listOfGrantDifferences.Where(g => g.Difference == DIFFERENCE_DIFFERENT).OrderBy(g => g.PrivilegeOrder(privilegeOrderDict)).ToList().Select(g => g.PrivilegeDisplayShort(privilegeNamesShortDict)).ToArray());
+            if (differentValues.Length > 0)
+            {
+                differentValues= String.Format("~~{0}", differentValues);
+            }
+
+            string cellValue = String.Join("\n-and-\n", new string[] {missingValues, extraValues, differentValues}.Where(s => String.IsNullOrEmpty(s) == false));
+            cell.Value = cellValue;
+ 
+            if (cellValue.ToString().Length > 12)
+            {
+                missingValues = String.Join('\n', listOfGrantDifferences.Where(g => g.Difference == DIFFERENCE_MISSING).OrderBy(g => g.PrivilegeOrder(privilegeOrderDict)).ToList().Select(g => g.PrivilegeDisplayLong).ToArray());
+                if (missingValues.Length > 0)
+                {
+                    missingValues = String.Format("MISSING:\n{0}", missingValues);
+                }
+
+                extraValues = String.Join('\n', listOfGrantDifferences.Where(g => g.Difference == DIFFERENCE_EXTRA).OrderBy(g => g.PrivilegeOrder(privilegeOrderDict)).ToList().Select(g => g.PrivilegeDisplayLong).ToArray());
+                if (extraValues.Length > 0)
+                {
+                    extraValues = String.Format("EXTRA:\n{0}", extraValues);
+                }
+
+                differentValues = String.Join('\n', listOfGrantDifferences.Where(g => g.Difference == DIFFERENCE_DIFFERENT).OrderBy(g => g.PrivilegeOrder(privilegeOrderDict)).ToList().Select(g => g.PrivilegeDisplayLong).ToArray());
+                if (differentValues.Length > 0)
+                {
+                    differentValues = String.Format("DIFFERENT:\n{0}", differentValues);
+                }
+
+                cell.AddComment(String.Join("\n-and-\n", new string[] {missingValues, extraValues, differentValues}.Where(s => String.IsNullOrEmpty(s) == false)), "Snowflake");
+                 cell.Comment.AutoFit = true;
+            }
+        }
+
     }
 }

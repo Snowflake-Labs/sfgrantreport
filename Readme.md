@@ -31,6 +31,10 @@ Audit changes in privileges between two different reports:
 And a pivot by type:
 ![](docs/Compare/DifferencesByTypePivot.png?raw=true)
 
+And a view for all objects and their roles:
+![](docs/Compare/DifferencesForObjectsAndRoles.png?raw=true)
+
+
 # Install Prerequisites
 ## Install SnowSQL
 To access data in Snowflake, you need to install SnowSQL on your system as described in [Installing SnowSQL](https://docs.snowflake.com/en/user-guide/snowsql-install-config.html).

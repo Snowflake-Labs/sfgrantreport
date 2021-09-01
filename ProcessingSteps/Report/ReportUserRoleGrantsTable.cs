@@ -76,102 +76,13 @@ namespace Snowflake.GrantReport.ProcessingSteps
         private const string TABLE_GRANTS_TYPE_VS_PRIVILEGE_TABLE_PER_OBJECT_TYPE = "t_Grants_Table_{0}";
 
         private const string SHEET_GRANTS_IN_DATABASE_FOR_ALL_ROLES = "DB.{0}";
-        private const string table_GRANTS_IN_DATABASE_FOR_ALL_ROLES = "t_Grants_DB_{0}";
+        private const string TABLE_GRANTS_IN_DATABASE_FOR_ALL_ROLES = "t_Grants_DB_{0}";
 
         private const int LIST_SHEET_START_TABLE_AT = 4;
         private const int PIVOT_SHEET_START_PIVOT_AT = 7;
         private const int PIVOT_SHEET_CHART_HEIGHT = 14;
 
         #endregion        
-
-        Dictionary<string, string> privilegeNamesShortDict = new Dictionary<string, string>
-        {
-            // Common
-            {"USAGE", "U"},
-            {"OWNERSHIP", "O"},
-
-            {"MODIFY", "M"},
-            {"MONITOR", "MON"},
-
-            // Database
-            {"CREATE SCHEMA", "SCHM"},
-            {"IMPORTED PRIVILEGES", "IMP_PRV"},
-            {"REFERENCE_USAGE", "REF_USG"},
-
-            // Schema
-            {"ADD SEARCH OPTIMIZATION", "SEO"},
-            {"CREATE EXTERNAL TABLE", "TBL_EXT"},
-            {"CREATE FILE FORMAT", "FF"},
-            {"CREATE FUNCTION", "FUNC"},
-            {"CREATE MASKING POLICY", "MSKPOL"},
-            {"CREATE MATERIALIZED VIEW", "MV"},
-            {"CREATE PIPE", "PIPE"},
-            {"CREATE PROCEDURE", "PROC"},
-            {"CREATE SEQUENCE", "SEQ"},
-            {"CREATE STAGE", "STG"},
-            {"CREATE STREAM", "STRM"},
-            {"CREATE TABLE", "TBL"},
-            {"CREATE TASK", "TASK"},
-            {"CREATE TEMPORARY TABLE", "TBL_TMP"},
-            {"CREATE VIEW", "VIEW"},
-
-            // Table
-            {"INSERT", "C"},
-            {"SELECT", "R"},
-            {"UPDATE", "U"},
-            {"DELETE", "D"},
-            {"TRUNCATE", "T"},
-
-            // View
-            {"REBUILD", "RBLD"},
-            {"REFERENCES", "REF"}
-        };
-
-        Dictionary<string, int> privilegeOrderDict = new Dictionary<string, int>
-        {
-            // Common
-            {"USAGE",       1},
-            {"OWNERSHIP",   2},
-
-            // Database
-            {"CREATE SCHEMA",       120},
-            {"IMPORTED PRIVILEGES", 121},
-            {"REFERENCE_USAGE",     122},
-
-            // Schema
-            {"CREATE TABLE",                200},
-            {"CREATE TEMPORARY TABLE",      201},
-            {"CREATE EXTERNAL TABLE",       202},
-            {"CREATE VIEW",                 203},
-            {"CREATE MATERIALIZED VIEW",    204},
-            {"CREATE PROCEDURE",            205},
-            {"CREATE FUNCTION",             206},
-            {"CREATE STAGE",                207},
-            {"CREATE FILE FORMAT",          208},
-            {"CREATE TASK",                 209},
-            {"CREATE PIPE",                 210},
-            {"CREATE SEQUENCE",             211},
-            {"CREATE STREAM",               212},
-            {"CREATE MASKING POLICY",       213},
-
-            {"ADD SEARCH OPTIMIZATION",     200},
-
-            // Table
-            {"INSERT",      10},
-            {"SELECT",      11},
-            {"UPDATE",      12},
-            {"DELETE",      13},
-            {"TRUNCATE",    14},
-
-            // View
-            {"REBUILD",     15},
-            {"REFERENCES",  16},
-
-            // Common
-            {"MODIFY",      50},
-            {"MONITOR",     51}
-        };
-
 
         public override bool Execute(ProgramOptions programOptions)
         {
@@ -984,12 +895,10 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
                     sheet.Cells[headerRowIndex, 2].Value = "Full Name";
                     sheet.Cells[headerRowIndex, 3].Value = "Short Name";
                     
-                    // Roles header
-
-                    // Database name
                     int currentRowIndex = headerRowIndex;
                     currentRowIndex++;
-                    
+
+                    // Database name                   
                     sheet.Cells[currentRowIndex, 1].Value = database.EntityType;
                     sheet.Cells[currentRowIndex, 2].Value = database.FullName;
                     sheet.Cells[currentRowIndex, 3].Value = database.ShortName;
@@ -1137,7 +1046,7 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
                     for (int i = roleColumnBeginIndex; i <= table.Columns.Count; i++)
                     {
                         sheet.Cells[headerRowIndex, i].Style.TextRotation = 135;
-                        sheet.Column(i).Width = 10;
+                        sheet.Column(i).Width = 7;
                     }
 
                     // Format the cells
@@ -1174,6 +1083,9 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
                     var cfFuture = sheet.ConditionalFormatting.AddContainsText(rangeToFormat);
                     cfFuture.Style.Fill.BackgroundColor.Color = Color.GreenYellow;
                     cfFuture.Text = "<";
+
+                    logger.Info("{0} Sheet ({1} rows)", sheet.Name, sheet.Dimension.Rows);
+                    loggerConsole.Info("{0} Sheet ({1} rows)", sheet.Name, sheet.Dimension.Rows);
                 }
             }
 

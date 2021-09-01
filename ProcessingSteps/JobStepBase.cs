@@ -57,6 +57,110 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
         #endregion
 
+        #region Privilege lookup dictionaries
+
+        public Dictionary<string, string> privilegeNamesShortDict = new Dictionary<string, string>
+        {
+            // Common
+            {"USAGE", "U"},
+            {"OWNERSHIP", "O"},
+
+            {"MODIFY", "M"},
+            {"MONITOR", "MON"},
+            {"OPERATE", "OPER"},
+
+            // Database
+            {"CREATE SCHEMA", "SCHM"},
+            {"IMPORTED PRIVILEGES", "IMP_PRV"},
+            {"REFERENCE_USAGE", "REF_USG"},
+
+            // Schema
+            {"ADD SEARCH OPTIMIZATION", "SEO"},
+            {"CREATE EXTERNAL TABLE", "TBL_EXT"},
+            {"CREATE FILE FORMAT", "FF"},
+            {"CREATE FUNCTION", "FUNC"},
+            {"CREATE MASKING POLICY", "MSKPOL"},
+            {"CREATE MATERIALIZED VIEW", "MV"},
+            {"CREATE PIPE", "PIPE"},
+            {"CREATE PROCEDURE", "PROC"},
+            {"CREATE SEQUENCE", "SEQ"},
+            {"CREATE STAGE", "STG"},
+            {"CREATE STREAM", "STRM"},
+            {"CREATE TABLE", "TBL"},
+            {"CREATE TASK", "TASK"},
+            {"CREATE TEMPORARY TABLE", "TBL_TMP"},
+            {"CREATE VIEW", "VIEW"},
+
+            // Table
+            {"INSERT", "C"},
+            {"SELECT", "R"},
+            {"UPDATE", "U"},
+            {"DELETE", "D"},
+            {"TRUNCATE", "T"},
+
+            // View
+            {"REBUILD", "RBLD"},
+            {"REFERENCES", "REF"},
+
+            // Stage
+            {"READ", "R"},
+            {"WRITE", "W"},
+            
+            // Policy
+            {"APPLY", "A"}
+        };
+
+        public Dictionary<string, int> privilegeOrderDict = new Dictionary<string, int>
+        {
+            // Common
+            {"USAGE",       1},
+            {"OWNERSHIP",   2},
+           
+           // Common
+            {"MODIFY",      50},
+            {"MONITOR",     51},
+            {"OPERATE",     52},
+
+            // Database
+            {"CREATE SCHEMA",       120},
+            {"IMPORTED PRIVILEGES", 121},
+            {"REFERENCE_USAGE",     122},
+
+            // Schema
+            {"CREATE TABLE",                200},
+            {"CREATE TEMPORARY TABLE",      201},
+            {"CREATE EXTERNAL TABLE",       202},
+            {"CREATE VIEW",                 203},
+            {"CREATE MATERIALIZED VIEW",    204},
+            {"CREATE PROCEDURE",            205},
+            {"CREATE FUNCTION",             206},
+            {"CREATE STAGE",                207},
+            {"CREATE FILE FORMAT",          208},
+            {"CREATE TASK",                 209},
+            {"CREATE PIPE",                 210},
+            {"CREATE SEQUENCE",             211},
+            {"CREATE STREAM",               212},
+            {"CREATE MASKING POLICY",       213},
+            {"ADD SEARCH OPTIMIZATION",     214},
+
+            // Table
+            {"INSERT",      10},
+            {"SELECT",      11},
+            {"UPDATE",      12},
+            {"DELETE",      13},
+            {"TRUNCATE",    14},
+
+            // View
+            {"REBUILD",     15},
+            {"REFERENCES",  16},
+
+            // Stage
+            {"READ",        20},
+            {"WRITE",       21} 
+        };
+
+        #endregion        
+
         internal static Logger logger = LogManager.GetCurrentClassLogger();
         internal static Logger loggerConsole = LogManager.GetLogger("Snowflake.GrantReport.Console");
 
