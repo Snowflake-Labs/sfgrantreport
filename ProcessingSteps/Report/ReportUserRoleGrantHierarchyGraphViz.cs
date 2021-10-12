@@ -121,6 +121,11 @@ namespace Snowflake.GrantReport.ProcessingSteps
                                 sbGraphViz.AppendLine(" // Roles");
                                 sbGraphViz.AppendLine  ("  subgraph cluster_roles {");
                                 sbGraphViz.AppendFormat("   label = \"roles related to: {0}\";", role); sbGraphViz.AppendLine();
+
+                                // Add the role itself
+                                sbGraphViz.AppendFormat("  \"{0}\"{1};", role.Name.Replace("\"", "\\\""), getRoleStyleAttribute(role)); sbGraphViz.AppendLine();
+                                roleNamesOutput.Add(role.Name, role);
+
                                 foreach (RoleHierarchy roleHierarchy in thisRoleAndItsRelationsHierarchiesList)
                                 {
                                     if (roleHierarchy.GrantedTo != "<NOTHING>" && roleNamesOutput.ContainsKey(roleHierarchy.GrantedTo) == false)
