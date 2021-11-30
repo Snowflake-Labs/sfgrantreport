@@ -1,5 +1,5 @@
 // Grants to Roles via Snowhouse
-// snowsql -c snowhouse -f "SnowhouseGrantsToUsers.sql" -D DEPLOYMENT='deploymentoftheaccountyouwant' -D ACCOUNT_ID=accountidofaccountyouwant -o output_format=csv -o header=true -o timing=false -o friendly=false > "GRANTS_TO_ROLES.csv"
+// snowsql -c snowhouse -f "SnowhouseGrantsToRoles.sql" -D DEPLOYMENT='deploymentoftheaccountyouwant' -D ACCOUNT_ID=accountidofaccountyouwant -o variable_substitution=true -o output_format=csv -o header=true -o timing=false -o friendly=false > "GRANTS_TO_ROLES.csv"
 
 select
     t.granted_on as created_on,

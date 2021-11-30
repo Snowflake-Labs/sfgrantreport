@@ -1,5 +1,5 @@
 // Grants to Users via Snowhouse
-// snowsql -c snowhouse -f "SnowhouseGrantsToUsers.sql" -D DEPLOYMENT='deploymentoftheaccountyouwant' -D ACCOUNT_ID=accountidofaccountyouwant -o output_format=csv -o header=true -o timing=false -o friendly=false > "GRANTS_TO_USERS.csv"
+// snowsql -c snowhouse -f "SnowhouseGrantsToUsers.sql" -D DEPLOYMENT='deploymentoftheaccountyouwant' -D ACCOUNT_ID=accountidofaccountyouwant -o variable_substitution=true -o output_format=csv -o header=true -o timing=false -o friendly=false > "GRANTS_TO_USERS.csv"
 
 select
   (user_role_grant_etl.dpo:"UserRoleGrantDPO:changelog".grantedOn::int/1000)::timestamp_ltz AS created_on
