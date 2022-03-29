@@ -220,7 +220,10 @@ namespace Snowflake.GrantReport.ProcessingSteps
                                                 break;
                                             }
 
-                                            sbGraphViz.AppendFormat("     <tr><td align=\"left\">{0}</td><td align=\"right\">{1}</td><td align=\"right\">{2}</td></tr>", schema.ShortName, schema.Tables.Count, schema.Views.Count); sbGraphViz.AppendLine();
+                                            // Do not output future grants which are in form of <SCHEMANAME>
+                                            if (schema.ShortName.StartsWith("<") && schema.ShortName.EndsWith(">")) continue;
+
+                                            sbGraphViz.AppendFormat("     <tr><td align=\"left\">{0}</td><td align=\"right\">{1}</td><td align=\"right\">{2}</td></tr>", System.Web.HttpUtility.HtmlEncode(schema.ShortName), schema.Tables.Count, schema.Views.Count); sbGraphViz.AppendLine();
 
                                             schemaLimit++;
                                         }

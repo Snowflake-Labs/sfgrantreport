@@ -914,7 +914,7 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
                             // Add another Role to the header
                             thisRoleColumnIndex = roleColumnMaxIndex;
                             roleToHeaderMapping.Add(firstGrant.GrantedTo, thisRoleColumnIndex);
-                            sheet.Cells[headerRowIndex, thisRoleColumnIndex].Value = firstGrant.GrantedTo;
+                            if (thisRoleColumnIndex <= 16384) sheet.Cells[headerRowIndex, thisRoleColumnIndex].Value = firstGrant.GrantedTo;
                             roleColumnMaxIndex++;
                         }
                         else
@@ -922,7 +922,7 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
                             // Previously seen
                             thisRoleColumnIndex = roleToHeaderMapping[firstGrant.GrantedTo];
                         }
-                        outputGrantstToCell(sheet.Cells[currentRowIndex, thisRoleColumnIndex], grantsByRoleNameGroup.ToList());
+                        if (thisRoleColumnIndex <= 16384) outputGrantstToCell(sheet.Cells[currentRowIndex, thisRoleColumnIndex], grantsByRoleNameGroup.ToList());
                     }
 
                     currentRowIndex++;
@@ -944,7 +944,7 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
                                 // Add another Role to the header
                                 thisRoleColumnIndex = roleColumnMaxIndex;
                                 roleToHeaderMapping.Add(firstGrant.GrantedTo, thisRoleColumnIndex);
-                                sheet.Cells[headerRowIndex, thisRoleColumnIndex].Value = firstGrant.GrantedTo;
+                                if (thisRoleColumnIndex <= 16384) sheet.Cells[headerRowIndex, thisRoleColumnIndex].Value = firstGrant.GrantedTo;
                                 roleColumnMaxIndex++;
                             }
                             else
@@ -952,7 +952,7 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
                                 // Previously seen
                                 thisRoleColumnIndex = roleToHeaderMapping[firstGrant.GrantedTo];
                             }
-                            outputGrantstToCell(sheet.Cells[currentRowIndex, thisRoleColumnIndex], grantsByRoleNameGroup.ToList());
+                            if (thisRoleColumnIndex <= 16384) outputGrantstToCell(sheet.Cells[currentRowIndex, thisRoleColumnIndex], grantsByRoleNameGroup.ToList());
                         }
 
                         currentRowIndex++;
@@ -974,7 +974,7 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
                                     // Add another Role to the header
                                     thisRoleColumnIndex = roleColumnMaxIndex;
                                     roleToHeaderMapping.Add(firstGrant.GrantedTo, thisRoleColumnIndex);
-                                    sheet.Cells[headerRowIndex, thisRoleColumnIndex].Value = firstGrant.GrantedTo;
+                                    if (thisRoleColumnIndex <= 16384) sheet.Cells[headerRowIndex, thisRoleColumnIndex].Value = firstGrant.GrantedTo;
                                     roleColumnMaxIndex++;
                                 }
                                 else
@@ -982,7 +982,7 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
                                     // Previously seen
                                     thisRoleColumnIndex = roleToHeaderMapping[firstGrant.GrantedTo];
                                 }
-                                outputGrantstToCell(sheet.Cells[currentRowIndex, thisRoleColumnIndex], grantsByRoleNameGroup.ToList());
+                                if (thisRoleColumnIndex <= 16384) outputGrantstToCell(sheet.Cells[currentRowIndex, thisRoleColumnIndex], grantsByRoleNameGroup.ToList());
                             }
 
                             sheet.Row(currentRowIndex).OutlineLevel = 1;
@@ -1006,7 +1006,7 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
                                     // Add another Role to the header
                                     thisRoleColumnIndex = roleColumnMaxIndex;
                                     roleToHeaderMapping.Add(firstGrant.GrantedTo, thisRoleColumnIndex);
-                                    sheet.Cells[headerRowIndex, thisRoleColumnIndex].Value = firstGrant.GrantedTo;
+                                    if (thisRoleColumnIndex <= 16384) sheet.Cells[headerRowIndex, thisRoleColumnIndex].Value = firstGrant.GrantedTo;
                                     roleColumnMaxIndex++;
                                 }
                                 else
@@ -1014,7 +1014,7 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
                                     // Previously seen
                                     thisRoleColumnIndex = roleToHeaderMapping[firstGrant.GrantedTo];
                                 }
-                                outputGrantstToCell(sheet.Cells[currentRowIndex, thisRoleColumnIndex], grantsByRoleNameGroup.ToList());
+                                if (thisRoleColumnIndex <= 16384) outputGrantstToCell(sheet.Cells[currentRowIndex, thisRoleColumnIndex], grantsByRoleNameGroup.ToList());
                             }
 
                             sheet.Row(currentRowIndex).OutlineLevel = 1;
@@ -1050,39 +1050,43 @@ List<SingleStringRow> objectTypesList = FileIOHelper.ReadListFromCSVFile<SingleS
                     }
 
                     // Format the cells
-                    ExcelRangeBase rangeToFormat = sheet.Cells[headerRowIndex + 1, 4, sheet.Dimension.Rows, sheet.Dimension.Columns];
-                    rangeToFormat.StyleName = "ShortPermissionStyle";
+                    // But only if the number of columns isn't insanely high
+                    if (sheet.Dimension.Columns <=10000)
+                    {
+                        ExcelRangeBase rangeToFormat = sheet.Cells[headerRowIndex + 1, 4, sheet.Dimension.Rows, sheet.Dimension.Columns];
+                        rangeToFormat.StyleName = "ShortPermissionStyle";
 
-                    var cfR = sheet.ConditionalFormatting.AddEqual(rangeToFormat);
-                    cfR.Style.Font.Color.Color = Color.Green;
-                    cfR.Style.Fill.BackgroundColor.Color = Color.LightGreen;
-                    cfR.Formula = "=\"R\"";
+                        var cfR = sheet.ConditionalFormatting.AddEqual(rangeToFormat);
+                        cfR.Style.Font.Color.Color = Color.Green;
+                        cfR.Style.Fill.BackgroundColor.Color = Color.LightGreen;
+                        cfR.Formula = "=\"R\"";
 
-                    var cfCRUD = sheet.ConditionalFormatting.AddContainsText(rangeToFormat);
-                    cfCRUD.Style.Font.Color.Color = Color.DarkRed;
-                    cfCRUD.Style.Fill.BackgroundColor.Color = Color.Pink;
-                    cfCRUD.Text = "C,R,U,D";
+                        var cfCRUD = sheet.ConditionalFormatting.AddContainsText(rangeToFormat);
+                        cfCRUD.Style.Font.Color.Color = Color.DarkRed;
+                        cfCRUD.Style.Fill.BackgroundColor.Color = Color.Pink;
+                        cfCRUD.Text = "C,R,U,D";
 
-                    var cfCRU = sheet.ConditionalFormatting.AddContainsText(rangeToFormat);
-                    cfCRU.Style.Font.Color.Color = Color.OrangeRed;
-                    cfCRU.Style.Fill.BackgroundColor.Color = Color.Gold;
-                    cfCRU.Text = "C,R,U";
+                        var cfCRU = sheet.ConditionalFormatting.AddContainsText(rangeToFormat);
+                        cfCRU.Style.Font.Color.Color = Color.OrangeRed;
+                        cfCRU.Style.Fill.BackgroundColor.Color = Color.Gold;
+                        cfCRU.Text = "C,R,U";
 
-                    var cfO = sheet.ConditionalFormatting.AddEqual(rangeToFormat);
-                    cfO.Style.Font.Color.Color = Color.DarkBlue;
-                    cfO.Style.Fill.BackgroundColor.Color = Color.Azure;
-                    cfO.Formula = "=\"O\"";
-                    
-                    var cfOPlus = sheet.ConditionalFormatting.AddEqual(rangeToFormat);
-                    cfOPlus.Style.Font.Color.Color = Color.DarkBlue;
-                    cfOPlus.Style.Fill.BackgroundColor.Color = Color.LightBlue;
-                    cfOPlus.Formula = "=\"O+\"";
+                        var cfO = sheet.ConditionalFormatting.AddEqual(rangeToFormat);
+                        cfO.Style.Font.Color.Color = Color.DarkBlue;
+                        cfO.Style.Fill.BackgroundColor.Color = Color.Azure;
+                        cfO.Formula = "=\"O\"";
+                        
+                        var cfOPlus = sheet.ConditionalFormatting.AddEqual(rangeToFormat);
+                        cfOPlus.Style.Font.Color.Color = Color.DarkBlue;
+                        cfOPlus.Style.Fill.BackgroundColor.Color = Color.LightBlue;
+                        cfOPlus.Formula = "=\"O+\"";
 
-                    rangeToFormat = sheet.Cells[headerRowIndex + 1, 3, sheet.Dimension.Rows, 3];
+                        rangeToFormat = sheet.Cells[headerRowIndex + 1, 3, sheet.Dimension.Rows, 3];
 
-                    var cfFuture = sheet.ConditionalFormatting.AddContainsText(rangeToFormat);
-                    cfFuture.Style.Fill.BackgroundColor.Color = Color.GreenYellow;
-                    cfFuture.Text = "<";
+                        var cfFuture = sheet.ConditionalFormatting.AddContainsText(rangeToFormat);
+                        cfFuture.Style.Fill.BackgroundColor.Color = Color.GreenYellow;
+                        cfFuture.Text = "<";
+                    }
 
                     logger.Info("{0} Sheet ({1} rows)", sheet.Name, sheet.Dimension.Rows);
                     loggerConsole.Info("{0} Sheet ({1} rows)", sheet.Name, sheet.Dimension.Rows);
