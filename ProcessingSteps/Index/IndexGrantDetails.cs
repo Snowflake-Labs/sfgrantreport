@@ -49,7 +49,7 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
                 loggerConsole.Info("Process Grants OF");
 
-                List<RoleMember> grantsOfRolesAndUsersList = FileIOHelper.ReadListFromCSVFile<RoleMember>(FilePathMap.Data_RoleShowGrantsOf_FilePath(), new RoleMemberShowGrantsMap(), "No data returned");
+                List<RoleMember> grantsOfRolesAndUsersList = FileIOHelper.ReadListFromCSVFile<RoleMember>(FilePathMap.Data_RoleShowGrantsOf_FilePath(), new RoleMemberShowGrantsMap(), new string[] {"No data returned", "SQL compilation error", "does not exist"});
                 if (grantsOfRolesAndUsersList != null)
                 {
                     foreach (RoleMember roleMember in grantsOfRolesAndUsersList)
@@ -73,28 +73,28 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
                 List<Grant> grantsNonUniqueList = new List<Grant>();
 
-                List<Grant> grantsOnRolesList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Data_RoleShowGrantsOn_FilePath(), new GrantShowGrantsMap(), "No data returned");
+                List<Grant> grantsOnRolesList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Data_RoleShowGrantsOn_FilePath(), new GrantShowGrantsMap(), new string[] {"No data returned", "SQL compilation error", "does not exist"});
                 if (grantsOnRolesList != null)
                 {
                     loggerConsole.Info("Granted ON {0} grants", grantsOnRolesList.Count);
                     grantsNonUniqueList.AddRange(grantsOnRolesList);
                 }
 
-                List<Grant> grantsToRolesList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Data_RoleShowGrantsTo_FilePath(), new GrantShowGrantsMap(), "No data returned");
+                List<Grant> grantsToRolesList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Data_RoleShowGrantsTo_FilePath(), new GrantShowGrantsMap(), new string[] {"No data returned", "SQL compilation error", "does not exist"});
                 if (grantsToRolesList != null)
                 {
                     loggerConsole.Info("Granted TO {0} grants", grantsToRolesList.Count);
                     grantsNonUniqueList.AddRange(grantsToRolesList);
                 }
 
-                List<Grant> grantsFutureDatabasesList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Data_FutureGrantsInDatabases_FilePath(), new GrantShowFutureGrantsMap(), "No data returned");
+                List<Grant> grantsFutureDatabasesList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Data_FutureGrantsInDatabases_FilePath(), new GrantShowFutureGrantsMap(), new string[] {"No data returned", "SQL compilation error", "does not exist"});
                 if (grantsFutureDatabasesList != null)
                 {
                     loggerConsole.Info("Future Grants on Databases {0} grants", grantsFutureDatabasesList.Count);
                     grantsNonUniqueList.AddRange(grantsFutureDatabasesList);
                 }
 
-                List<Grant> grantsFutureSchemasList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Data_FutureGrantsInSchemas_FilePath(), new GrantShowFutureGrantsMap(), "No data returned");
+                List<Grant> grantsFutureSchemasList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Data_FutureGrantsInSchemas_FilePath(), new GrantShowFutureGrantsMap(), new string[] {"No data returned", "SQL compilation error", "does not exist"});
                 if (grantsFutureSchemasList != null)
                 {
                     loggerConsole.Info("Future Grants on Schemas {0} grants", grantsFutureSchemasList.Count);

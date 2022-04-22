@@ -206,7 +206,7 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
                 #region Future Grants
 
-                List<Grant> grantsToRolesList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Data_RoleShowGrantsTo_FilePath(), new GrantShowGrantsMap(), "No data returned");
+                List<Grant> grantsToRolesList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Data_RoleShowGrantsTo_FilePath(), new GrantShowGrantsMap(), new string[] {"No data returned", "SQL compilation error", "does not exist"});
                 if (grantsToRolesList != null)
                 {
                     // Get list of all databases and process them

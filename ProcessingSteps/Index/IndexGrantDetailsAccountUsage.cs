@@ -54,7 +54,7 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
                 List<RoleMember> grantsOfRolesList = new List<RoleMember>();
 
-                List<Grant> grantsOnRolesList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Input_RoleShowGrantsToAndOn_FilePath(), new GrantGrantToRolesMap(), "Initiating login request with your identity provider");
+                List<Grant> grantsOnRolesList = FileIOHelper.ReadListFromCSVFile<Grant>(FilePathMap.Input_RoleShowGrantsToAndOn_FilePath(), new GrantGrantToRolesMap(), new string[] {"Initiating login request with your identity provider"});
 
                 if (grantsOnRolesList != null)
                 {
@@ -344,7 +344,7 @@ namespace Snowflake.GrantReport.ProcessingSteps
 
                 loggerConsole.Info("Process Grants OF Users");
 
-                List<RoleMember> grantsOfUsersList = FileIOHelper.ReadListFromCSVFile<RoleMember>(FilePathMap.Input_RoleShowGrantsOf_FilePath(), new RoleMemberGrantsToUsersMap(), "Initiating login request with your identity provider");
+                List<RoleMember> grantsOfUsersList = FileIOHelper.ReadListFromCSVFile<RoleMember>(FilePathMap.Input_RoleShowGrantsOf_FilePath(), new RoleMemberGrantsToUsersMap(), new string[] {"Initiating login request with your identity provider"});
                 if (grantsOfUsersList != null)
                 {
                     foreach (RoleMember roleMember in grantsOfUsersList)

@@ -12,8 +12,9 @@
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/bin/Debug/net5.0/SFGrantReport.dll",
             //"args": ["-l", "C:\\snowflake\\SnowflakeGrantReport\\Reports\\aws_cas1", "-r", "C:\\snowflake\\SnowflakeGrantReport\\Reports\\aws_cas1.offline.08192021", "-o", "C:\\snowflake\\SnowflakeGrantReport\\Reports\\aws_cas1.offline.08192021.compare" ],
-            "args": ["-i", "C:\\snowflake\\SnowflakeGrantReport\\ACCOUNT_USAGE_INPUT\\COINBASE_Snowhouse", "-o", "C:\\snowflake\\SnowflakeGrantReport\\Reports\\COINBASE.20220314"],
-            //"args": ["-c", "sfgrantreport", "-o", "C:\\snowflake\\SnowflakeGrantReport\\Reports\\Avalera\\myReports", "-s"],
+            //"args": ["-i", "C:\\snowflake\\SnowflakeGrantReport\\ACCOUNT_USAGE_INPUT\\COINBASE_Snowhouse", "-o", "C:\\snowflake\\SnowflakeGrantReport\\Reports\\COINBASE.20220314"],
+            "args": ["-c", "aws_cas2.dodievich", "-o", "C:\\snowflake\\SnowflakeGrantReport\\Reports\\aws_cas2.20220421"],
+            //"args": ["-i", "C:\\snowflake\\SnowflakeGrantReport\\ACCOUNT_USAGE_INPUT\\COINBASE_Snowhouse", "-o", "C:\\snowflake\\SnowflakeGrantReport\\Reports\\COINBASE.20220314"],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "externalTerminal",

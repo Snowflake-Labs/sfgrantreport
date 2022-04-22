@@ -223,7 +223,8 @@ namespace Snowflake.GrantReport.ProcessingSteps
                 '{', 
                 '}', 
                 '~', 
-                '`' };
+                '`',
+                '@' };
             foreach (var c in roleNameSpecialChars)
             {
                 // Escape the embedded "
@@ -251,6 +252,13 @@ namespace Snowflake.GrantReport.ProcessingSteps
             {
                 return String.Format("\"{0}\"", objectName);
             }
+
+            // Finally check for lowercase of the objects. If lowercase exists, quote them
+            if (objectName.Any(char.IsLower) == true)
+            {
+                return String.Format("\"{0}\"", objectName);
+            }        
+
             return objectName;
         }
 

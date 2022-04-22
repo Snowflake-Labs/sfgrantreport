@@ -559,10 +559,10 @@ namespace Snowflake.GrantReport
 
         public static List<T> ReadListFromCSVFile<T>(string csvFilePath, ClassMap<T> classMap)
         {
-            return ReadListFromCSVFile<T>(csvFilePath, classMap, String.Empty);
+            return ReadListFromCSVFile<T>(csvFilePath, classMap, null);
         }
 
-        public static List<T> ReadListFromCSVFile<T>(string csvFilePath, ClassMap<T> classMap, string skipRecordPrefix)
+        public static List<T> ReadListFromCSVFile<T>(string csvFilePath, ClassMap<T> classMap, string[] skipRecordValues)
         {
             try
             {
@@ -583,9 +583,10 @@ namespace Snowflake.GrantReport
                             logger.Warn("Bad thing on row {0}, char {1}, field '{2}'", rc.Row, rc.CharPosition, rc.Field);
                             logger.Warn(rc.RawRecord);
                         };
-                        if (skipRecordPrefix.Length > 0)
+                        if (skipRecordValues != null && skipRecordValues.Length > 0)
                         {
-                            csvReader.Configuration.ShouldSkipRecord = record => record.FirstOrDefault()?.StartsWith(skipRecordPrefix) ?? false;
+                            //csvReader.Configuration.ShouldSkipRecord = record => record.FirstOrDefault()?.StartsWith(skipRecordPrefix) ?? false;
+                            csvReader.Configuration.ShouldSkipRecord = record => ShouldSkipRecordFunction(record, skipRecordValues);
                         }
                         return csvReader.GetRecords<T>().ToList();
                     }
@@ -598,6 +599,20 @@ namespace Snowflake.GrantReport
             }
 
             return null;
+        }
+
+        private static bool ShouldSkipRecordFunction(string[] record, string[] skipRecordValues)
+        {
+            if (record == null) return true;
+
+            if (record.Length == 0) return true;
+
+            for (int i = 0; i < skipRecordValues.Length; i++)
+            {
+                if (record[0].Contains(skipRecordValues[i]) == true) return true;
+            }
+            
+            return false;
         }
 
         public static bool AppendTwoCSVFiles(string csvToAppendToFilePath, string csvFromWhichToAppendFilePath)
